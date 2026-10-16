@@ -1,0 +1,8 @@
+{
+  "name": "Minimal Music Ear Trainer",
+  "description": "A clean, responsive web application for musical ear training, focused on chords and intervals with synthesized piano and electric piano.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
