@@ -6,14 +6,33 @@ export type IntervalPlaybackMode = 'harmonic' | 'melodic' | 'melodic_ascending';
 
 export type MelodicDirection = 'both' | 'ascending' | 'descending';
 
-export type SectionType = 'chords' | 'intervals';
+export type SectionType = 'chords' | 'intervals' | 'mistakes';
 
 export type Language = 'ku' | 'tr';
+
+export interface ChordMistakeRecord {
+  chordId: string;
+  mistakeCount: number;
+  lastMistakeDate: string; // ISO 8601 string
+}
+
+export interface MistakeSummaryItem extends ChordMistakeRecord {
+  percentage: number;
+}
+
+export interface MistakesSummary {
+  totalMistakes: number;
+  uniqueChordsMissed: number;
+  mostMissedChordId: string | null;
+  mostRecentMistakeDate: string | null;
+  items: MistakeSummaryItem[];
+}
 
 export interface ChordDefinition {
   id: string;
   name: string;
   shortName: string;
+  formula: string; // Musical scale degree formula (e.g. "1 3 5", "1 m3 5 m7", "1 3 5 M7")
   intervals: number[]; // semitones relative to root
   category: 'three-note' | 'four-note';
   symbol: string;

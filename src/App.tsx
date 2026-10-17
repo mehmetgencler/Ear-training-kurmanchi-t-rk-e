@@ -1,26 +1,31 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Instrument, SectionType, Language } from './types/music.js';
 import { CHORD_DEFINITIONS, INTERVAL_DEFINITIONS } from './music/definitions.js';
 import { InstrumentSelector } from './components/InstrumentSelector.tsx';
 import { PitchRangeControl } from './components/PitchRangeControl.tsx';
 import { ChordTraining } from './components/ChordTraining.tsx';
 import { IntervalTraining } from './components/IntervalTraining.tsx';
+import { ChordMistakesView } from './components/ChordMistakesView.tsx';
 import { audioEngine } from './audio/audioEngine.js';
+import { getTotalMistakesCount } from './storage/mistakesStorage.js';
 import { TRANSLATIONS } from './i18n/translations.js';
-import { Music2, Layers, Languages } from 'lucide-react';
+import { Music2, Layers, Languages, BarChart3 } from 'lucide-react';
 
 export default function App() {
   // GUI language: Default is Kurdish (Kurmancî in Turkey), secondary is Turkish (Türkçe in Turkey)
   const [language, setLanguage] = useState<Language>('ku');
 
-  // Shared instrument selection across both sections (Acoustic Piano & Electric Piano)
+  // Shared instrument selection across sections (Acoustic Piano & Electric Piano)
   const [instrument, setInstrument] = useState<Instrument>('acoustic-piano');
 
   // Shared question pitch range in octaves (2 to 8, default 2)
   const [pitchRangeOctaves, setPitchRangeOctaves] = useState<number>(2);
 
-  // Navigation section
+  // Navigation section: 'chords' | 'intervals' | 'mistakes'
   const [activeSection, setActiveSection] = useState<SectionType>('chords');
+
+  // Mistake count state to sync top tab badge
+  const [mistakesCount, setMistakesCount] = useState<number>(() => getTotalMistakesCount());
 
   // Preserve selections across section changes during session
   // Default to all active initially for immediate readiness
@@ -42,6 +47,10 @@ export default function App() {
     audioEngine.stopAllPlayback();
     setActiveSection(section);
   };
+
+  const refreshMistakesCount = useCallback(() => {
+    setMistakesCount(getTotalMistakesCount());
+  }, []);
 
   return (
     <div className="min-h-screen bg-stone-950 text-stone-100 flex flex-col font-sans selection:bg-amber-500/30 selection:text-amber-200">
@@ -108,11 +117,11 @@ export default function App() {
             </div>
 
             {/* Section Navigation Tabs */}
-            <nav className="inline-flex p-1 bg-stone-950 border border-stone-800 rounded-xl" aria-label="Training Sections">
+            <nav className="inline-flex flex-wrap p-1 bg-stone-950 border border-stone-800 rounded-xl" aria-label="Training Sections">
               <button
                 type="button"
                 onClick={() => handleSectionChange('chords')}
-                className={`flex items-center gap-2 px-3 sm:px-4 py-1.5 text-xs font-semibold rounded-lg transition-all ${
+                className={`flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all ${
                   activeSection === 'chords'
                     ? 'bg-amber-500 text-stone-950 shadow-sm'
                     : 'text-stone-300 hover:text-white hover:bg-stone-800/60'
@@ -125,7 +134,7 @@ export default function App() {
               <button
                 type="button"
                 onClick={() => handleSectionChange('intervals')}
-                className={`flex items-center gap-2 px-3 sm:px-4 py-1.5 text-xs font-semibold rounded-lg transition-all ${
+                className={`flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all ${
                   activeSection === 'intervals'
                     ? 'bg-amber-500 text-stone-950 shadow-sm'
                     : 'text-stone-300 hover:text-white hover:bg-stone-800/60'
@@ -134,6 +143,30 @@ export default function App() {
                 <Music2 className="w-3.5 h-3.5" />
                 <span>{t.intervalTrainingTab}</span>
               </button>
+
+              <button
+                type="button"
+                onClick={() => handleSectionChange('mistakes')}
+                className={`flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all ${
+                  activeSection === 'mistakes'
+                    ? 'bg-amber-500 text-stone-950 shadow-sm'
+                    : 'text-stone-300 hover:text-white hover:bg-stone-800/60'
+                }`}
+              >
+                <BarChart3 className="w-3.5 h-3.5" />
+                <span>{t.mistakesTab}</span>
+                {mistakesCount > 0 && (
+                  <span
+                    className={`ml-0.5 text-[10px] font-mono font-bold px-1.5 py-0.2 rounded-full ${
+                      activeSection === 'mistakes'
+                        ? 'bg-stone-950 text-amber-300'
+                        : 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
+                    }`}
+                  >
+                    {mistakesCount}
+                  </span>
+                )}
+              </button>
             </nav>
           </div>
         </div>
@@ -141,36 +174,49 @@ export default function App() {
 
       {/* Main Content Area */}
       <main className="flex-1 max-w-4xl w-full mx-auto px-4 py-6 sm:py-8 space-y-6">
-        {/* Global Settings: Instrument & Pitch Range */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <InstrumentSelector
-            currentInstrument={instrument}
-            onSelectInstrument={handleInstrumentChange}
-            language={language}
-          />
-          <PitchRangeControl
-            pitchRangeOctaves={pitchRangeOctaves}
-            onChangePitchRange={setPitchRangeOctaves}
-            language={language}
-          />
-        </div>
+        {/* Global Settings: Instrument & Pitch Range (shown for ear training quiz sections) */}
+        {activeSection !== 'mistakes' && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <InstrumentSelector
+              currentInstrument={instrument}
+              onSelectInstrument={handleInstrumentChange}
+              language={language}
+            />
+            <PitchRangeControl
+              pitchRangeOctaves={pitchRangeOctaves}
+              onChangePitchRange={setPitchRangeOctaves}
+              language={language}
+            />
+          </div>
+        )}
 
         {/* Section View */}
-        {activeSection === 'chords' ? (
+        {activeSection === 'chords' && (
           <ChordTraining
             instrument={instrument}
             activeChordIds={activeChordIds}
             setActiveChordIds={setActiveChordIds}
             pitchRangeOctaves={pitchRangeOctaves}
             language={language}
+            onMistakeRecorded={refreshMistakesCount}
           />
-        ) : (
+        )}
+
+        {activeSection === 'intervals' && (
           <IntervalTraining
             instrument={instrument}
             activeIntervalIds={activeIntervalIds}
             setActiveIntervalIds={setActiveIntervalIds}
             pitchRangeOctaves={pitchRangeOctaves}
             language={language}
+          />
+        )}
+
+        {activeSection === 'mistakes' && (
+          <ChordMistakesView
+            language={language}
+            onNavigateToQuiz={() => handleSectionChange('chords')}
+            onMistakesUpdated={refreshMistakesCount}
           />
         )}
       </main>

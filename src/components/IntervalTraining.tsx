@@ -38,6 +38,12 @@ export const IntervalTraining: React.FC<IntervalTrainingProps> = ({
   const [feedback, setFeedback] = useState<QuizAnswerFeedback | null>(null);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [audioErrorNotice, setAudioErrorNotice] = useState<string | null>(null);
+  // Multi-item history buffer to prevent repetition and ensure deep question pool exploration
+  const [recentHistory, setRecentHistory] = useState<{
+    intervalIds: string[];
+    rootMidis: number[];
+    directions: ('ascending' | 'descending')[];
+  }>({ intervalIds: [], rootMidis: [], directions: [] });
 
   const isMelodic = playbackMode === 'melodic' || playbackMode === 'melodic_ascending';
 
@@ -86,14 +92,21 @@ export const IntervalTraining: React.FC<IntervalTrainingProps> = ({
     if (activeIntervalIds.length === 0) return;
     const newQuestion = generateIntervalQuestion(
       activeIntervalIds,
-      undefined,
+      recentHistory.intervalIds,
       undefined,
       pitchRangeOctaves,
-      melodicDirection
+      melodicDirection,
+      recentHistory.rootMidis,
+      recentHistory.directions
     );
     setCurrentQuestion(newQuestion);
     setFeedback(null);
     setIsQuizActive(true);
+    setRecentHistory({
+      intervalIds: [newQuestion.intervalId],
+      rootMidis: [newQuestion.rootMidi],
+      directions: [newQuestion.direction],
+    });
     playCurrentQuestion(newQuestion, playbackMode, noteSpacing);
   };
 
@@ -102,13 +115,20 @@ export const IntervalTraining: React.FC<IntervalTrainingProps> = ({
     if (activeIntervalIds.length === 0) return;
     const nextQ = generateIntervalQuestion(
       activeIntervalIds,
-      currentQuestion?.intervalId,
+      recentHistory.intervalIds,
       undefined,
       pitchRangeOctaves,
-      melodicDirection
+      melodicDirection,
+      recentHistory.rootMidis,
+      recentHistory.directions
     );
     setCurrentQuestion(nextQ);
     setFeedback(null);
+    setRecentHistory((prev) => ({
+      intervalIds: [...prev.intervalIds, nextQ.intervalId].slice(-8),
+      rootMidis: [...prev.rootMidis, nextQ.rootMidi].slice(-8),
+      directions: [...prev.directions, nextQ.direction].slice(-6),
+    }));
     playCurrentQuestion(nextQ, playbackMode, noteSpacing);
   };
 

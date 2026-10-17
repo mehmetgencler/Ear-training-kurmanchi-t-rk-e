@@ -12,37 +12,41 @@ export const CHORD_DEFINITIONS: readonly ChordDefinition[] = [
     id: 'major',
     name: 'Major',
     shortName: 'Maj',
+    formula: '1 3 5',
     intervals: [0, 4, 7],
     category: 'three-note',
     symbol: 'M',
-    description: 'Root, Major 3rd, Perfect 5th (0, 4, 7)'
+    description: 'Root, Major 3rd, Perfect 5th [1 3 5]'
   },
   {
     id: 'minor',
     name: 'Minor',
     shortName: 'Min',
+    formula: '1 m3 5',
     intervals: [0, 3, 7],
     category: 'three-note',
     symbol: 'm',
-    description: 'Root, Minor 3rd, Perfect 5th (0, 3, 7)'
+    description: 'Root, Minor 3rd, Perfect 5th [1 m3 5]'
   },
   {
     id: 'diminished',
     name: 'Diminished',
     shortName: 'Dim',
+    formula: '1 m3 b5',
     intervals: [0, 3, 6],
     category: 'three-note',
     symbol: 'dim / °',
-    description: 'Root, Minor 3rd, Diminished 5th (0, 3, 6)'
+    description: 'Root, Minor 3rd, Diminished 5th [1 m3 b5]'
   },
   {
     id: 'augmented',
     name: 'Augmented',
     shortName: 'Aug',
+    formula: '1 3 #5',
     intervals: [0, 4, 8],
     category: 'three-note',
     symbol: 'aug / +',
-    description: 'Root, Major 3rd, Augmented 5th (0, 4, 8)'
+    description: 'Root, Major 3rd, Augmented 5th [1 3 #5]'
   },
 
   // Four-note chords
@@ -50,37 +54,41 @@ export const CHORD_DEFINITIONS: readonly ChordDefinition[] = [
     id: 'major_seventh',
     name: 'Major seventh',
     shortName: 'maj7',
+    formula: '1 3 5 M7',
     intervals: [0, 4, 7, 11],
     category: 'four-note',
     symbol: 'maj7 / M7',
-    description: 'Root, Major 3rd, Perfect 5th, Major 7th (0, 4, 7, 11)'
+    description: 'Root, Major 3rd, Perfect 5th, Major 7th [1 3 5 M7]'
   },
   {
     id: 'dominant_seventh',
     name: 'Dominant seventh',
     shortName: '7',
+    formula: '1 3 5 m7',
     intervals: [0, 4, 7, 10],
     category: 'four-note',
     symbol: '7',
-    description: 'Root, Major 3rd, Perfect 5th, Minor 7th (0, 4, 7, 10)'
+    description: 'Root, Major 3rd, Perfect 5th, Minor 7th [1 3 5 m7]'
   },
   {
     id: 'minor_seventh',
     name: 'Minor seventh',
     shortName: 'm7',
+    formula: '1 m3 5 m7',
     intervals: [0, 3, 7, 10],
     category: 'four-note',
     symbol: 'm7',
-    description: 'Root, Minor 3rd, Perfect 5th, Minor 7th (0, 3, 7, 10)'
+    description: 'Root, Minor 3rd, Perfect 5th, Minor 7th [1 m3 5 m7]'
   },
   {
     id: 'half_diminished_seventh',
     name: 'Half-diminished seventh',
     shortName: 'm7b5',
+    formula: '1 m3 b5 m7',
     intervals: [0, 3, 6, 10],
     category: 'four-note',
     symbol: 'm7b5 / ø7',
-    description: 'Root, Minor 3rd, Diminished 5th, Minor 7th (0, 3, 6, 10)'
+    description: 'Root, Minor 3rd, Diminished 5th, Minor 7th [1 m3 b5 m7]'
   }
 ] as const;
 

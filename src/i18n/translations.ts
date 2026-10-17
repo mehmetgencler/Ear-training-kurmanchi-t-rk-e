@@ -91,6 +91,33 @@ export interface Translations {
   restartIntervalQuiz: string;
   audioErrorNotice: string;
 
+  // Mistakes Module
+  mistakesTab: string;
+  mistakesTitle: string;
+  mistakesSubtitle: string;
+  totalMistakesLabel: string;
+  mostMissedChordLabel: string;
+  lastMistakeDateLabel: string;
+  uniqueChordsMissedLabel: string;
+  mistakeDistributionTitle: string;
+  mistakeDistributionSubtitle: string;
+  rankedMistakesTitle: string;
+  rankedMistakesSubtitle: string;
+  chordTypeHeader: string;
+  formulaHeader: string;
+  mistakeCountHeader: string;
+  percentageHeader: string;
+  lastOccurredHeader: string;
+  clearMistakesButton: string;
+  confirmClearTitle: string;
+  confirmClearMessage: string;
+  confirmYes: string;
+  confirmCancel: string;
+  noMistakesTitle: string;
+  noMistakesDescription: string;
+  neverRecorded: string;
+  timesCount: (count: number) => string;
+
   // Footer
   footerText: string;
 }
@@ -190,6 +217,33 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     restartIntervalQuiz: 'Bi Hilbijartinê Ji Nû Ve Dest Pê Bike',
     audioErrorNotice:
       'Lêdana deng hewceyê destpêkê têkiliya bikarhêner e. Ji kerema xwe li "Dengê Dubare Bike" bixe.',
+
+    // Mistakes Module (Kurmancî)
+    mistakesTab: 'Şaşiyên Min',
+    mistakesTitle: 'Tomara Şaşiyan & Analîz',
+    mistakesSubtitle: 'Şaşiyên we yên testa akoran bi awayekî xwemalî di geroka we de têne parastin',
+    totalMistakesLabel: 'Tevahiya Şaşiyan',
+    mostMissedChordLabel: 'Akora Herî Pir Şaş Bûyî',
+    lastMistakeDateLabel: 'Dîroka Şaşiya Dawî',
+    uniqueChordsMissedLabel: 'Cureyên Akorên Şaş',
+    mistakeDistributionTitle: 'Belavbûna Şaşiyan Li Gorî Akoran',
+    mistakeDistributionSubtitle: 'Rêjeya şaşiyan ji bo her cureyekî akorê',
+    rankedMistakesTitle: 'Lîsteya Şaşiyan',
+    rankedMistakesSubtitle: 'Li gorî hejmara şaşiyan hatiye rêzkirin',
+    chordTypeHeader: 'Cureyê Akorê',
+    formulaHeader: 'Formûl',
+    mistakeCountHeader: 'Hejmara Şaşiyan',
+    percentageHeader: 'Rêje',
+    lastOccurredHeader: 'Cara Dawî',
+    clearMistakesButton: 'Hemû Şaşiyan Paqij Bike',
+    confirmClearTitle: 'Tomara Şaşiyan Paqij Bibe?',
+    confirmClearMessage: 'Hûn bawer in ku dixwazin hemû şaşiyên xwe yên tomarkirî ji gerokê paqij bikin? Ev nayê vegerandin.',
+    confirmYes: 'Erê, Paqij Bike',
+    confirmCancel: 'Betal Bike',
+    noMistakesTitle: 'Hîna ti şaşî nehatine tomarkirin',
+    noMistakesDescription: 'Dema ku hûn di ezmûna akoran de bersivek şaş bidin, ew ê bi hejmar û dîrokê ve li vir bê tomarkirin.',
+    neverRecorded: 'Nehatiye tomarkirin',
+    timesCount: (count) => `${count} car`,
 
     // Footer
     footerText:
@@ -291,6 +345,33 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     audioErrorNotice:
       'Ses çalınabilmesi için kullanıcı etkileşimi gerekir. Lütfen "Sesi Tekrar Dinle" butonuna dokunun.',
 
+    // Mistakes Module (Türkçe)
+    mistakesTab: 'Hatalarım',
+    mistakesTitle: 'Hata Kayıtları & Analiz',
+    mistakesSubtitle: 'Akor testlerindeki hatalarınız yalnızca tarayıcınızda yerel olarak saklanır',
+    totalMistakesLabel: 'Toplam Hata',
+    mostMissedChordLabel: 'En Çok Karıştırılan Akor',
+    lastMistakeDateLabel: 'Son Hata Tarihi',
+    uniqueChordsMissedLabel: 'Hata Yapılan Akor Türü',
+    mistakeDistributionTitle: 'Akor Türüne Göre Hata Dağılımı',
+    mistakeDistributionSubtitle: 'Her akor türünün toplam hatalar içindeki yüzdelik dağılımı',
+    rankedMistakesTitle: 'Hata Listesi',
+    rankedMistakesSubtitle: 'Hata sıklığına göre sıralı döküm',
+    chordTypeHeader: 'Akor Türü',
+    formulaHeader: 'Formül',
+    mistakeCountHeader: 'Hata Sayısı',
+    percentageHeader: 'Oran',
+    lastOccurredHeader: 'Son Oluşum',
+    clearMistakesButton: 'Hataları Temizle',
+    confirmClearTitle: 'Hata Kayıtları Temizlensin mi?',
+    confirmClearMessage: 'Tarayıcınızda kayıtlı olan tüm akor hatalarını sıfırlamak istediğinizden emin misiniz? Bu işlem geri alınamaz.',
+    confirmYes: 'Evet, Temizle',
+    confirmCancel: 'İptal',
+    noMistakesTitle: 'Henüz hiç hata kaydedilmedi',
+    noMistakesDescription: 'Akor testinde yanlış bir cevap verdiğinizde, akor türü, hata sayısı ve tarihi burada otomatik olarak kaydedilecektir.',
+    neverRecorded: 'Kaydedilmedi',
+    timesCount: (count) => `${count} kez`,
+
     // Footer
     footerText:
       'Akustik Piyano (gerçek piyano kayıtları) & Elektro Piyano (sentetik) · Kök pozisyon akorlar · Çıkıcı & inici aralıklar',
@@ -302,90 +383,106 @@ export const TRANSLATIONS: Record<Language, Translations> = {
  */
 export const CHORD_LOCALIZATION: Record<
   Language,
-  Record<string, { name: string; shortName: string; description?: string }>
+  Record<string, { name: string; shortName: string; formula: string; description?: string }>
 > = {
   ku: {
     major: {
       name: 'Major',
       shortName: 'Maj',
-      description: 'Notaya bingehîn, Sêyema mezin, Pêncema tam (0, 4, 7)',
+      formula: '1 3 5',
+      description: 'Notaya bingehîn, Sêyema mezin, Pêncema tam [1 3 5]',
     },
     minor: {
       name: 'Mînor',
       shortName: 'Min',
-      description: 'Notaya bingehîn, Sêyema piçûk, Pêncema tam (0, 3, 7)',
+      formula: '1 m3 5',
+      description: 'Notaya bingehîn, Sêyema piçûk, Pêncema tam [1 m3 5]',
     },
     diminished: {
       name: 'Kêmkirî (Dim)',
       shortName: 'Dim',
-      description: 'Notaya bingehîn, Sêyema piçûk, Pêncema kêmkirî (0, 3, 6)',
+      formula: '1 m3 b5',
+      description: 'Notaya bingehîn, Sêyema piçûk, Pêncema kêmkirî [1 m3 b5]',
     },
     augmented: {
       name: 'Zêdekirî (Aug)',
       shortName: 'Aug',
-      description: 'Notaya bingehîn, Sêyema mezin, Pêncema zêdekirî (0, 4, 8)',
+      formula: '1 3 #5',
+      description: 'Notaya bingehîn, Sêyema mezin, Pêncema zêdekirî [1 3 #5]',
     },
     major_seventh: {
       name: 'Major heftemîn',
       shortName: 'maj7',
-      description: 'Notaya bingehîn, Sêyema mezin, Pêncema tam, Heftema mezin (0, 4, 7, 11)',
+      formula: '1 3 5 M7',
+      description: 'Notaya bingehîn, Sêyema mezin, Pêncema tam, Heftema mezin [1 3 5 M7]',
     },
     dominant_seventh: {
       name: 'Domînant heftemîn',
       shortName: '7',
-      description: 'Notaya bingehîn, Sêyema mezin, Pêncema tam, Heftema piçûk (0, 4, 7, 10)',
+      formula: '1 3 5 m7',
+      description: 'Notaya bingehîn, Sêyema mezin, Pêncema tam, Heftema piçûk [1 3 5 m7]',
     },
     minor_seventh: {
       name: 'Mînor heftemîn',
       shortName: 'm7',
-      description: 'Notaya bingehîn, Sêyema piçûk, Pêncema tam, Heftema piçûk (0, 3, 7, 10)',
+      formula: '1 m3 5 m7',
+      description: 'Notaya bingehîn, Sêyema piçûk, Pêncema tam, Heftema piçûk [1 m3 5 m7]',
     },
     half_diminished_seventh: {
       name: 'Nîv-kêmkirî heftemîn',
       shortName: 'm7b5',
-      description: 'Notaya bingehîn, Sêyema piçûk, Pêncema kêmkirî, Heftema piçûk (0, 3, 6, 10)',
+      formula: '1 m3 b5 m7',
+      description: 'Notaya bingehîn, Sêyema piçûk, Pêncema kêmkirî, Heftema piçûk [1 m3 b5 m7]',
     },
   },
   tr: {
     major: {
       name: 'Majör',
       shortName: 'Maj',
-      description: 'Kök, Büyük 3\'lü, Tam 5\'li (0, 4, 7)',
+      formula: '1 3 5',
+      description: 'Kök, Büyük 3\'lü, Tam 5\'li [1 3 5]',
     },
     minor: {
       name: 'Minör',
       shortName: 'Min',
-      description: 'Kök, Küçük 3\'lü, Tam 5\'li (0, 3, 7)',
+      formula: '1 m3 5',
+      description: 'Kök, Küçük 3\'lü, Tam 5\'li [1 m3 5]',
     },
     diminished: {
       name: 'Eksilmiş (Dim)',
       shortName: 'Dim',
-      description: 'Kök, Küçük 3\'lü, Eksilmiş 5\'li (0, 3, 6)',
+      formula: '1 m3 b5',
+      description: 'Kök, Küçük 3\'lü, Eksilmiş 5\'li [1 m3 b5]',
     },
     augmented: {
       name: 'Artmış (Aug)',
       shortName: 'Aug',
-      description: 'Kök, Büyük 3\'lü, Artmış 5\'li (0, 4, 8)',
+      formula: '1 3 #5',
+      description: 'Kök, Büyük 3\'lü, Artmış 5\'li [1 3 #5]',
     },
     major_seventh: {
       name: 'Majör yedili',
       shortName: 'maj7',
-      description: 'Kök, Büyük 3\'lü, Tam 5\'li, Büyük 7\'li (0, 4, 7, 11)',
+      formula: '1 3 5 M7',
+      description: 'Kök, Büyük 3\'lü, Tam 5\'li, Büyük 7\'li [1 3 5 M7]',
     },
     dominant_seventh: {
       name: 'Dominant yedili',
       shortName: '7',
-      description: 'Kök, Büyük 3\'lü, Tam 5\'li, Küçük 7\'li (0, 4, 7, 10)',
+      formula: '1 3 5 m7',
+      description: 'Kök, Büyük 3\'lü, Tam 5\'li, Küçük 7\'li [1 3 5 m7]',
     },
     minor_seventh: {
       name: 'Minör yedili',
       shortName: 'm7',
-      description: 'Kök, Küçük 3\'lü, Tam 5\'li, Küçük 7\'li (0, 3, 7, 10)',
+      formula: '1 m3 5 m7',
+      description: 'Kök, Küçük 3\'lü, Tam 5\'li, Küçük 7\'li [1 m3 5 m7]',
     },
     half_diminished_seventh: {
       name: 'Yarı-eksilmiş yedili',
       shortName: 'm7b5',
-      description: 'Kök, Küçük 3\'lü, Eksilmiş 5\'li, Küçük 7\'li (0, 3, 6, 10)',
+      formula: '1 m3 b5 m7',
+      description: 'Kök, Küçük 3\'lü, Eksilmiş 5\'li, Küçük 7\'li [1 m3 b5 m7]',
     },
   },
 };
@@ -432,13 +529,15 @@ export function getLocalizedChord(
   lang: Language,
   fallbackName: string,
   fallbackShortName: string,
-  fallbackDescription: string
+  fallbackDescription: string,
+  fallbackFormula: string = ''
 ) {
   const localized = CHORD_LOCALIZATION[lang]?.[chordId];
   return {
     name: localized?.name || fallbackName,
     shortName: localized?.shortName || fallbackShortName,
     description: localized?.description || fallbackDescription,
+    formula: localized?.formula || fallbackFormula,
   };
 }
 

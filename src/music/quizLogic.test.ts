@@ -13,7 +13,9 @@ import {
   generateChordQuestion,
   generateIntervalQuestion,
   validateAnswer,
-  pickRandomItemAvoidRepeat
+  pickRandomItemAvoidRepeat,
+  pickDiverseRootMidi,
+  pickBalancedDirection
 } from './quizLogic.js';
 import {
   ACOUSTIC_PIANO_SAMPLES,
@@ -27,15 +29,23 @@ test('Chord definitions match the prompt specifications exactly', () => {
 
   // Three-note chords
   assert.deepEqual(CHORD_BY_ID.get('major')?.intervals, [0, 4, 7]);
+  assert.equal(CHORD_BY_ID.get('major')?.formula, '1 3 5');
   assert.deepEqual(CHORD_BY_ID.get('minor')?.intervals, [0, 3, 7]);
+  assert.equal(CHORD_BY_ID.get('minor')?.formula, '1 m3 5');
   assert.deepEqual(CHORD_BY_ID.get('diminished')?.intervals, [0, 3, 6]);
+  assert.equal(CHORD_BY_ID.get('diminished')?.formula, '1 m3 b5');
   assert.deepEqual(CHORD_BY_ID.get('augmented')?.intervals, [0, 4, 8]);
+  assert.equal(CHORD_BY_ID.get('augmented')?.formula, '1 3 #5');
 
   // Four-note chords
   assert.deepEqual(CHORD_BY_ID.get('major_seventh')?.intervals, [0, 4, 7, 11]);
+  assert.equal(CHORD_BY_ID.get('major_seventh')?.formula, '1 3 5 M7');
   assert.deepEqual(CHORD_BY_ID.get('dominant_seventh')?.intervals, [0, 4, 7, 10]);
+  assert.equal(CHORD_BY_ID.get('dominant_seventh')?.formula, '1 3 5 m7');
   assert.deepEqual(CHORD_BY_ID.get('minor_seventh')?.intervals, [0, 3, 7, 10]);
+  assert.equal(CHORD_BY_ID.get('minor_seventh')?.formula, '1 m3 5 m7');
   assert.deepEqual(CHORD_BY_ID.get('half_diminished_seventh')?.intervals, [0, 3, 6, 10]);
+  assert.equal(CHORD_BY_ID.get('half_diminished_seventh')?.formula, '1 m3 b5 m7');
 });
 
 test('Interval definitions match the prompt specifications exactly', () => {
@@ -390,5 +400,140 @@ test('GUI language localization supports Kurdish (Kurmancî) as default and Turk
   }
 });
 
+test('pickRandomItemAvoidRepeat with sliding-window history avoids recent items and prevents shallow cycling', () => {
+  const candidates = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
+  // When history has 3 items, the picked item should not be in that history
+  for (let trial = 0; trial < 30; trial++) {
+    const history = ['A', 'B', 'C'];
+    const picked = pickRandomItemAvoidRepeat(candidates, history);
+    assert.ok(!history.includes(picked), `Picked item ${picked} should not be in recent history ${history}`);
+  }
 
+  // Two candidates: strictly alternates and never repeats consecutively
+  let current = 'X';
+  for (let i = 0; i < 20; i++) {
+    const next = pickRandomItemAvoidRepeat(['X', 'Y'], current);
+    assert.notEqual(next, current, `Candidate must alternate between X and Y without repeating`);
+    current = next;
+  }
+});
 
+test('pickDiverseRootMidi avoids repeating exact recent roots and pitch classes', () => {
+  // Range: C3 (48) to C5 (72)
+  const minMidi = 48;
+  const maxMidi = 72;
+
+  let recentRoots: number[] = [];
+  for (let step = 0; step < 50; step++) {
+    const root = pickDiverseRootMidi(minMidi, maxMidi, recentRoots);
+    assert.ok(root >= minMidi && root <= maxMidi, `Root ${root} must be within bounds [${minMidi}, ${maxMidi}]`);
+
+    // Never repeat the exact same root consecutively
+    if (recentRoots.length > 0) {
+      assert.notEqual(root, recentRoots[recentRoots.length - 1], `Root note ${root} must not repeat consecutively`);
+    }
+
+    recentRoots.push(root);
+  }
+
+  // Pitch class diversity: across 50 questions, most chromatic pitch classes should be explored
+  const pitchClasses = new Set(recentRoots.map(r => r % 12));
+  assert.ok(pitchClasses.size >= 10, `Across 50 trials, at least 10 different chromatic pitch classes should be explored (found ${pitchClasses.size})`);
+});
+
+test('pickBalancedDirection breaks streaks and ensures balanced distribution for Mode B intervals', () => {
+  // If last 3 were ascending, next MUST be descending to break the streak
+  const forceDesc = pickBalancedDirection('both', ['ascending', 'ascending', 'ascending']);
+  assert.equal(forceDesc, 'descending', 'Must break streak of 3 ascending');
+
+  // If last 3 were descending, next MUST be ascending to break the streak
+  const forceAsc = pickBalancedDirection('both', ['descending', 'descending', 'descending']);
+  assert.equal(forceAsc, 'ascending', 'Must break streak of 3 descending');
+
+  // Over 100 trials with 'both', neither direction should excessively dominate (< 70% of total)
+  const directions: ('ascending' | 'descending')[] = [];
+  for (let i = 0; i < 100; i++) {
+    const d = pickBalancedDirection('both', directions);
+    directions.push(d);
+  }
+  const ascCount = directions.filter(d => d === 'ascending').length;
+  const descCount = directions.filter(d => d === 'descending').length;
+  assert.ok(ascCount >= 30 && ascCount <= 70, `Ascending count ${ascCount}/100 should be balanced between 30 and 70`);
+  assert.ok(descCount >= 30 && descCount <= 70, `Descending count ${descCount}/100 should be balanced between 30 and 70`);
+});
+
+test('Simulated 100-question quiz loop shows flawless randomization with zero consecutive duplicate questions', () => {
+  // Test chord quiz loop over 100 rounds
+  const allChordIds = CHORD_DEFINITIONS.map(c => c.id);
+  const chordHistory: string[] = [];
+  const chordRootHistory: number[] = [];
+  const chordQuestionSignatures: string[] = [];
+  const chordCounts = new Map<string, number>();
+
+  for (let i = 0; i < 100; i++) {
+    const q = generateChordQuestion(allChordIds, chordHistory, undefined, 2, chordRootHistory);
+    const signature = `${q.chordId}_${q.rootMidi}`;
+
+    // Verify no two consecutive questions are identical in chord type
+    if (chordHistory.length > 0) {
+      assert.notEqual(q.chordId, chordHistory[chordHistory.length - 1], `Chord ${q.chordId} repeated consecutively at step ${i}`);
+    }
+    // Verify question signature (chord + root) does not repeat consecutively
+    if (chordQuestionSignatures.length > 0) {
+      assert.notEqual(signature, chordQuestionSignatures[chordQuestionSignatures.length - 1], `Question signature ${signature} repeated consecutively`);
+    }
+
+    chordHistory.push(q.chordId);
+    chordRootHistory.push(q.rootMidi);
+    chordQuestionSignatures.push(signature);
+    chordCounts.set(q.chordId, (chordCounts.get(q.chordId) || 0) + 1);
+  }
+
+  // All 8 chords must have been generated (no shallow starvation)
+  assert.equal(chordCounts.size, 8, 'All 8 chord types must be represented in 100 questions');
+  for (const [id, count] of chordCounts) {
+    assert.ok(count >= 5, `Chord ${id} should appear at least 5 times in 100 questions (appeared ${count} times)`);
+  }
+
+  // Test interval quiz loop over 100 rounds
+  const allIntervalIds = INTERVAL_DEFINITIONS.map(i => i.id);
+  const intervalHistory: string[] = [];
+  const intervalRootHistory: number[] = [];
+  const intervalDirHistory: ('ascending' | 'descending')[] = [];
+  const intervalQuestionSignatures: string[] = [];
+  const intervalCounts = new Map<string, number>();
+
+  for (let i = 0; i < 100; i++) {
+    const q = generateIntervalQuestion(
+      allIntervalIds,
+      intervalHistory,
+      undefined,
+      2,
+      'both',
+      intervalRootHistory,
+      intervalDirHistory
+    );
+    const signature = `${q.intervalId}_${q.rootMidi}_${q.direction}`;
+
+    // Verify no two consecutive intervals are identical in interval type
+    if (intervalHistory.length > 0) {
+      assert.notEqual(q.intervalId, intervalHistory[intervalHistory.length - 1], `Interval ${q.intervalId} repeated consecutively at step ${i}`);
+    }
+    // Verify question signature does not repeat consecutively
+    if (intervalQuestionSignatures.length > 0) {
+      assert.notEqual(signature, intervalQuestionSignatures[intervalQuestionSignatures.length - 1], `Interval signature ${signature} repeated consecutively`);
+    }
+
+    intervalHistory.push(q.intervalId);
+    intervalRootHistory.push(q.rootMidi);
+    intervalDirHistory.push(q.direction);
+    intervalQuestionSignatures.push(signature);
+    intervalCounts.set(q.intervalId, (intervalCounts.get(q.intervalId) || 0) + 1);
+  }
+
+  // All 12 intervals must be represented (no shallow pool)
+  assert.equal(intervalCounts.size, 12, 'All 12 intervals must be represented in 100 questions');
+  for (const [id, count] of intervalCounts) {
+    assert.ok(count >= 3, `Interval ${id} should appear at least 3 times in 100 questions (appeared ${count} times)`);
+  }
+});

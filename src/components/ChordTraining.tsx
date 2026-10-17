@@ -10,6 +10,7 @@ import { CHORD_DEFINITIONS } from '../music/definitions.js';
 import { generateChordQuestion, validateAnswer } from '../music/quizLogic.js';
 import { audioEngine, AUDIO_TIMING } from '../audio/audioEngine.js';
 import { TRANSLATIONS, getLocalizedChord } from '../i18n/translations.js';
+import { recordChordMistake } from '../storage/mistakesStorage.js';
 import { Volume2, Play, ArrowRight, RotateCcw, CheckCircle2, XCircle, Settings2, Clock } from 'lucide-react';
 
 interface ChordTrainingProps {
@@ -18,6 +19,7 @@ interface ChordTrainingProps {
   setActiveChordIds: React.Dispatch<React.SetStateAction<string[]>>;
   pitchRangeOctaves: number;
   language: Language;
+  onMistakeRecorded?: (chordId: string) => void;
 }
 
 export const ChordTraining: React.FC<ChordTrainingProps> = ({
@@ -26,6 +28,7 @@ export const ChordTraining: React.FC<ChordTrainingProps> = ({
   setActiveChordIds,
   pitchRangeOctaves,
   language,
+  onMistakeRecorded,
 }) => {
   const t = TRANSLATIONS[language];
   const [playbackMode, setPlaybackMode] = useState<ChordPlaybackMode>('simultaneous');
@@ -36,6 +39,11 @@ export const ChordTraining: React.FC<ChordTrainingProps> = ({
   const [feedback, setFeedback] = useState<QuizAnswerFeedback | null>(null);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [audioErrorNotice, setAudioErrorNotice] = useState<string | null>(null);
+  // Multi-item history buffer to prevent repetition and ensure deep question pool exploration
+  const [recentHistory, setRecentHistory] = useState<{
+    chordIds: string[];
+    rootMidis: number[];
+  }>({ chordIds: [], rootMidis: [] });
 
   // Toggle active/inactive state of a chord type
   const toggleChordActive = (chordId: string) => {
@@ -80,19 +88,39 @@ export const ChordTraining: React.FC<ChordTrainingProps> = ({
   // Start new quiz
   const handleStartQuiz = () => {
     if (activeChordIds.length === 0) return;
-    const newQuestion = generateChordQuestion(activeChordIds, undefined, undefined, pitchRangeOctaves);
+    const newQuestion = generateChordQuestion(
+      activeChordIds,
+      recentHistory.chordIds,
+      undefined,
+      pitchRangeOctaves,
+      recentHistory.rootMidis
+    );
     setCurrentQuestion(newQuestion);
     setFeedback(null);
     setIsQuizActive(true);
+    setRecentHistory({
+      chordIds: [newQuestion.chordId],
+      rootMidis: [newQuestion.rootMidi],
+    });
     playCurrentQuestion(newQuestion, playbackMode, chordSustain);
   };
 
   // Next question
   const handleNextQuestion = () => {
     if (activeChordIds.length === 0) return;
-    const nextQ = generateChordQuestion(activeChordIds, currentQuestion?.chordId, undefined, pitchRangeOctaves);
+    const nextQ = generateChordQuestion(
+      activeChordIds,
+      recentHistory.chordIds,
+      undefined,
+      pitchRangeOctaves,
+      recentHistory.rootMidis
+    );
     setCurrentQuestion(nextQ);
     setFeedback(null);
+    setRecentHistory((prev) => ({
+      chordIds: [...prev.chordIds, nextQ.chordId].slice(-6),
+      rootMidis: [...prev.rootMidis, nextQ.rootMidi].slice(-6),
+    }));
     playCurrentQuestion(nextQ, playbackMode, chordSustain);
   };
 
@@ -108,6 +136,14 @@ export const ChordTraining: React.FC<ChordTrainingProps> = ({
     if (!currentQuestion || (feedback && feedback.answered)) return;
     const result = validateAnswer(chordId, currentQuestion.chordId);
     setFeedback(result);
+
+    // If answer is incorrect, record the target chord as a mistake
+    if (!result.isCorrect) {
+      recordChordMistake(currentQuestion.chordId);
+      if (onMistakeRecorded) {
+        onMistakeRecorded(currentQuestion.chordId);
+      }
+    }
   };
 
   // If playback mode changes during quiz, allow instant testing with current question
@@ -318,7 +354,7 @@ export const ChordTraining: React.FC<ChordTrainingProps> = ({
                     {loc.name}
                   </span>
                   <span className="text-[11px] text-stone-400 mt-0.5">
-                    ({loc.shortName})
+                    ({loc.shortName} · <span className="font-mono text-amber-400/90 font-medium">{chord.formula}</span>)
                   </span>
                 </button>
               );
@@ -354,8 +390,14 @@ export const ChordTraining: React.FC<ChordTrainingProps> = ({
                   <p className="text-xs text-stone-400 mt-1">
                     {t.notesPlayed} <span className="font-mono text-stone-200">{currentQuestion.noteNames.join(' - ')}</span> ({t.rootLabel} {currentQuestion.rootName})
                   </p>
-                  <p className="text-[11px] text-stone-500 mt-0.5">
-                    {t.formulaLabel} {getLocalizedChord(currentQuestion.chord.id, language, currentQuestion.chord.name, currentQuestion.chord.shortName, currentQuestion.chord.description).description}
+                  <p className="text-[11px] text-stone-400 mt-1">
+                    <span className="text-stone-300 font-medium">{t.formulaLabel}</span>{' '}
+                    <span className="font-mono font-bold text-amber-400 bg-amber-500/15 px-2 py-0.5 rounded border border-amber-500/30">
+                      {currentQuestion.chord.formula}
+                    </span>{' '}
+                    <span className="text-stone-400 ml-1">
+                      ({getLocalizedChord(currentQuestion.chord.id, language, currentQuestion.chord.name, currentQuestion.chord.shortName, currentQuestion.chord.description).description})
+                    </span>
                   </p>
                 </div>
               </div>
@@ -448,9 +490,15 @@ export const ChordTraining: React.FC<ChordTrainingProps> = ({
                       {isActive ? t.statusActive : t.statusOff}
                     </span>
                   </div>
-                  <p className="text-[11px] text-stone-400 mt-1">
-                    [{chord.intervals.join(', ')}] {t.semitonesUnit(chord.intervals.length)}
-                  </p>
+                  <div className="flex items-center gap-1.5 mt-1.5">
+                    <span className="text-[10px] uppercase font-bold text-stone-500">
+                      {loc.shortName}
+                    </span>
+                    <span className="text-stone-600">·</span>
+                    <span className="text-[11px] font-mono font-bold text-amber-400/95 tracking-wide">
+                      {chord.formula}
+                    </span>
+                  </div>
                 </button>
               );
             })}
@@ -490,9 +538,15 @@ export const ChordTraining: React.FC<ChordTrainingProps> = ({
                       {isActive ? t.statusActive : t.statusOff}
                     </span>
                   </div>
-                  <p className="text-[11px] text-stone-400 mt-1">
-                    [{chord.intervals.join(', ')}] {t.semitonesUnit(chord.intervals.length)}
-                  </p>
+                  <div className="flex items-center gap-1.5 mt-1.5">
+                    <span className="text-[10px] uppercase font-bold text-stone-500">
+                      {loc.shortName}
+                    </span>
+                    <span className="text-stone-600">·</span>
+                    <span className="text-[11px] font-mono font-bold text-amber-400/95 tracking-wide">
+                      {chord.formula}
+                    </span>
+                  </div>
                 </button>
               );
             })}
