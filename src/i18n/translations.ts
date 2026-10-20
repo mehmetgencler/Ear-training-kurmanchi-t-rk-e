@@ -90,6 +90,9 @@ export interface Translations {
   startIntervalQuiz: string;
   restartIntervalQuiz: string;
   audioErrorNotice: string;
+  audioTroubleshootNotice: string;
+  enableAudioButton: string;
+  silentSwitchWarning: string;
 
   // Mistakes Module
   mistakesTab: string;
@@ -217,6 +220,10 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     restartIntervalQuiz: 'Bi Hilbijartinê Ji Nû Ve Dest Pê Bike',
     audioErrorNotice:
       'Lêdana deng hewceyê destpêkê têkiliya bikarhêner e. Ji kerema xwe li "Dengê Dubare Bike" bixe.',
+    audioTroubleshootNotice:
+      'Deng nayê bihîstin? Heke hûn iPhone bi kar tînin, ji kerema xwe kontrol bikin ku bişkoka bêdeng (mute switch) a telefonê vekirî nîne, an li jêr bitikînin.',
+    enableAudioButton: 'Dengê Çalak Bike',
+    silentSwitchWarning: 'Piştrast bikin ku bişkoka deng a telefonê li ser bêdeng (mute) nîne.',
 
     // Mistakes Module (Kurmancî)
     mistakesTab: 'Şaşiyên Min',
@@ -344,6 +351,10 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     restartIntervalQuiz: 'Seçimle Yeniden Başlat',
     audioErrorNotice:
       'Ses çalınabilmesi için kullanıcı etkileşimi gerekir. Lütfen "Sesi Tekrar Dinle" butonuna dokunun.',
+    audioTroubleshootNotice:
+      'Ses duyulmuyor mu? iPhone kullanıyorsanız lütfen telefonun yanındaki sessiz anahtarını (mute switch) kontrol edin veya sesi etkinleştirmek için dokunun.',
+    enableAudioButton: 'Sesi Etkinleştir',
+    silentSwitchWarning: 'Telefonunuzun sessiz mod anahtarının (mute switch) kapalı (ses açık) olduğundan emin olun.',
 
     // Mistakes Module (Türkçe)
     mistakesTab: 'Hatalarım',

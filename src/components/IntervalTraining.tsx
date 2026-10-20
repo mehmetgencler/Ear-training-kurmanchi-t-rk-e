@@ -76,20 +76,36 @@ export const IntervalTraining: React.FC<IntervalTrainingProps> = ({
       try {
         setIsPlaying(true);
         setAudioErrorNotice(null);
+        await audioEngine.unlockAudio();
         await audioEngine.playInterval(question.playMidis, modeToUse, instrument, spacing);
       } catch (err) {
         console.error('Audio playback failed:', err);
-        setAudioErrorNotice(t.audioErrorNotice);
+        setAudioErrorNotice(t.audioTroubleshootNotice);
       } finally {
         setIsPlaying(false);
       }
     },
-    [instrument, noteSpacing, t.audioErrorNotice]
+    [instrument, noteSpacing, t.audioTroubleshootNotice]
   );
+
+  // Direct manual enable button handler
+  const handleEnableAudio = async () => {
+    try {
+      await audioEngine.unlockAudio();
+      setAudioErrorNotice(null);
+      if (currentQuestion) {
+        await playCurrentQuestion(currentQuestion, playbackMode, noteSpacing);
+      }
+    } catch (err) {
+      console.warn('Manual audio unlock retry failed:', err);
+    }
+  };
 
   // Start new quiz
   const handleStartQuiz = () => {
     if (activeIntervalIds.length === 0) return;
+    // Hardware unlock immediately in user touch/click stack
+    audioEngine.unlockAudio().catch(() => {});
     const newQuestion = generateIntervalQuestion(
       activeIntervalIds,
       recentHistory.intervalIds,
@@ -113,6 +129,7 @@ export const IntervalTraining: React.FC<IntervalTrainingProps> = ({
   // Next question
   const handleNextQuestion = () => {
     if (activeIntervalIds.length === 0) return;
+    audioEngine.unlockAudio().catch(() => {});
     const nextQ = generateIntervalQuestion(
       activeIntervalIds,
       recentHistory.intervalIds,
@@ -135,21 +152,24 @@ export const IntervalTraining: React.FC<IntervalTrainingProps> = ({
   // Replay question audio
   const handleReplay = () => {
     if (currentQuestion) {
+      audioEngine.unlockAudio().catch(() => {});
       playCurrentQuestion(currentQuestion, playbackMode, noteSpacing);
     }
   };
 
   // User submits an answer
-  const handleSelectAnswer = (intervalId: string) => {
+  const handleSelectAnswer = async (intervalId: string) => {
     if (!currentQuestion || (feedback && feedback.answered)) return;
+    await audioEngine.unlockAudio();
     const result = validateAnswer(intervalId, currentQuestion.intervalId);
     setFeedback(result);
   };
 
   // Mode change
-  const handleModeChange = (newMode: IntervalPlaybackMode) => {
+  const handleModeChange = async (newMode: IntervalPlaybackMode) => {
     setPlaybackMode(newMode);
     if (isQuizActive && currentQuestion) {
+      await audioEngine.unlockAudio();
       playCurrentQuestion(currentQuestion, newMode, noteSpacing);
     }
   };
@@ -352,8 +372,18 @@ export const IntervalTraining: React.FC<IntervalTrainingProps> = ({
           </div>
 
           {audioErrorNotice && (
-            <div className="p-3 bg-red-950/60 border border-red-800 rounded-lg text-xs text-red-300">
-              {audioErrorNotice}
+            <div className="p-3.5 bg-amber-950/40 border border-amber-600/40 rounded-xl text-xs text-amber-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-md">
+              <div className="flex items-start gap-2">
+                <Volume2 className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                <span className="leading-relaxed">{audioErrorNotice}</span>
+              </div>
+              <button
+                type="button"
+                onClick={handleEnableAudio}
+                className="shrink-0 px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs rounded-lg transition cursor-pointer"
+              >
+                {t.enableAudioButton}
+              </button>
             </div>
           )}
 
@@ -548,6 +578,23 @@ export const IntervalTraining: React.FC<IntervalTrainingProps> = ({
             );
           })}
         </div>
+
+        {/* Audio Notice if active */}
+        {audioErrorNotice && (
+          <div className="p-3.5 bg-amber-950/40 border border-amber-600/40 rounded-xl text-xs text-amber-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-md">
+            <div className="flex items-start gap-2">
+              <Volume2 className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+              <span className="leading-relaxed">{audioErrorNotice}</span>
+            </div>
+            <button
+              type="button"
+              onClick={handleEnableAudio}
+              className="shrink-0 px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-stone-950 font-bold text-xs rounded-lg transition cursor-pointer"
+            >
+              {t.enableAudioButton}
+            </button>
+          </div>
+        )}
 
         {/* Start Quiz Action */}
         <div className="pt-3 border-t border-stone-800 flex flex-col sm:flex-row items-center justify-between gap-3">
