@@ -135,8 +135,8 @@ export const ChordTraining: React.FC<ChordTrainingProps> = ({
     setCurrentQuestion(nextQ);
     setFeedback(null);
     setRecentHistory((prev) => ({
-      chordIds: [...prev.chordIds, nextQ.chordId].slice(-6),
-      rootMidis: [...prev.rootMidis, nextQ.rootMidi].slice(-6),
+      chordIds: [...prev.chordIds, nextQ.chordId].slice(-10),
+      rootMidis: [...prev.rootMidis, nextQ.rootMidi].slice(-10),
     }));
     playCurrentQuestion(nextQ, playbackMode, chordSustain);
   };

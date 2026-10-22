@@ -4,12 +4,13 @@ import { CHORD_DEFINITIONS, INTERVAL_DEFINITIONS } from './music/definitions.js'
 import { InstrumentSelector } from './components/InstrumentSelector.tsx';
 import { PitchRangeControl } from './components/PitchRangeControl.tsx';
 import { ChordTraining } from './components/ChordTraining.tsx';
+import { ChordProgressionTraining } from './components/ChordProgressionTraining.tsx';
 import { IntervalTraining } from './components/IntervalTraining.tsx';
 import { ChordMistakesView } from './components/ChordMistakesView.tsx';
 import { audioEngine } from './audio/audioEngine.js';
 import { getTotalMistakesCount } from './storage/mistakesStorage.js';
 import { TRANSLATIONS } from './i18n/translations.js';
-import { Music2, Layers, Languages, BarChart3 } from 'lucide-react';
+import { Music2, Layers, Languages, BarChart3, Repeat } from 'lucide-react';
 
 export default function App() {
   // GUI language: Default is Kurdish (Kurmancî in Turkey), secondary is Turkish (Türkçe in Turkey)
@@ -133,6 +134,19 @@ export default function App() {
 
               <button
                 type="button"
+                onClick={() => handleSectionChange('progressions')}
+                className={`flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all ${
+                  activeSection === 'progressions'
+                    ? 'bg-amber-500 text-stone-950 shadow-sm'
+                    : 'text-stone-300 hover:text-white hover:bg-stone-800/60'
+                }`}
+              >
+                <Repeat className="w-3.5 h-3.5" />
+                <span>{t.progressionTrainingTab}</span>
+              </button>
+
+              <button
+                type="button"
                 onClick={() => handleSectionChange('intervals')}
                 className={`flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-1.5 text-xs font-semibold rounded-lg transition-all ${
                   activeSection === 'intervals'
@@ -174,19 +188,25 @@ export default function App() {
 
       {/* Main Content Area */}
       <main className="flex-1 max-w-4xl w-full mx-auto px-4 py-6 sm:py-8 space-y-6">
-        {/* Global Settings: Instrument & Pitch Range (shown for ear training quiz sections) */}
+        {/* Global Settings: Instrument & Pitch Range */}
         {activeSection !== 'mistakes' && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div
+            className={`grid grid-cols-1 ${
+              activeSection === 'progressions' ? 'md:grid-cols-1' : 'md:grid-cols-2'
+            } gap-3`}
+          >
             <InstrumentSelector
               currentInstrument={instrument}
               onSelectInstrument={handleInstrumentChange}
               language={language}
             />
-            <PitchRangeControl
-              pitchRangeOctaves={pitchRangeOctaves}
-              onChangePitchRange={setPitchRangeOctaves}
-              language={language}
-            />
+            {activeSection !== 'progressions' && (
+              <PitchRangeControl
+                pitchRangeOctaves={pitchRangeOctaves}
+                onChangePitchRange={setPitchRangeOctaves}
+                language={language}
+              />
+            )}
           </div>
         )}
 
@@ -199,6 +219,13 @@ export default function App() {
             pitchRangeOctaves={pitchRangeOctaves}
             language={language}
             onMistakeRecorded={refreshMistakesCount}
+          />
+        )}
+
+        {activeSection === 'progressions' && (
+          <ChordProgressionTraining
+            instrument={instrument}
+            language={language}
           />
         )}
 

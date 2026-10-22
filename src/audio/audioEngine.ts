@@ -119,7 +119,7 @@ class AudioEngine {
   /**
    * Universal decodeAudioData supporting Promise and Callback (crucial for older Safari and WebKit)
    */
-  private decodeAudio(ctx: AudioContext, buffer: ArrayBuffer): Promise<AudioBuffer> {
+  public decodeAudio(ctx: AudioContext, buffer: ArrayBuffer): Promise<AudioBuffer> {
     return new Promise((resolve, reject) => {
       // slice buffer to keep original intact if retried
       const copy = buffer.slice(0);
@@ -752,6 +752,74 @@ class AudioEngine {
           0.85
         );
       }
+    } catch (err) {
+      this.lastErrorMessage = err instanceof Error ? err.message : String(err);
+      throw err;
+    }
+  }
+
+  /**
+   * Play a series of chords in progression with rhythm, voice leading, and optional callback
+   * when each chord sounds (for UI visualization and synchronization).
+   */
+  public async playProgression(
+    chordsMidis: number[][],
+    instrument: Instrument = 'acoustic-piano',
+    chordDuration: number = 1.3,
+    onChordStart?: (index: number) => void
+  ): Promise<void> {
+    try {
+      const ctx = this.getOrCreateContext();
+
+      if (ctx.state === 'suspended' || (ctx.state as string) === 'interrupted') {
+        try {
+          await ctx.resume();
+        } catch (err) {
+          console.warn('Could not resume context in playProgression:', err);
+        }
+      }
+
+      this.stopAllPlayback();
+
+      // Pre-warm sample buffer if acoustic piano
+      if (instrument === 'acoustic-piano') {
+        const uniqueNotes = Array.from(new Set(chordsMidis.flat()));
+        await this.ensureSamplesForNotes(uniqueNotes);
+      }
+
+      const now = ctx.currentTime + 0.04;
+      const step = chordDuration;
+
+      chordsMidis.forEach((noteMidis, index) => {
+        const chordStartTime = now + index * step;
+        const polyphonyScale = noteMidis.length <= 3 ? 0.75 : 0.65;
+
+        // Schedule visual callback
+        if (onChordStart) {
+          const delayMs = Math.max(0, (chordStartTime - ctx.currentTime) * 1000);
+          const timer = setTimeout(() => {
+            onChordStart(index);
+          }, delayMs);
+          this.pendingTimeouts.push(timer);
+        }
+
+        for (const midi of noteMidis) {
+          this.scheduleVoice(
+            midi,
+            chordStartTime,
+            chordDuration * 0.95,
+            instrument,
+            polyphonyScale
+          );
+        }
+      });
+
+      // Total playback time
+      const totalDuration = chordsMidis.length * step;
+      await new Promise(resolve => {
+        const endTimer = setTimeout(resolve, totalDuration * 1000);
+        this.pendingTimeouts.push(endTimer);
+      });
     } catch (err) {
       this.lastErrorMessage = err instanceof Error ? err.message : String(err);
       throw err;

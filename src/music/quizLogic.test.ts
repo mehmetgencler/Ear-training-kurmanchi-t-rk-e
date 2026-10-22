@@ -25,7 +25,7 @@ import {
 
 test('Chord definitions match the prompt specifications exactly', () => {
   // Check count
-  assert.equal(CHORD_DEFINITIONS.length, 8);
+  assert.equal(CHORD_DEFINITIONS.length, 9);
 
   // Three-note chords
   assert.deepEqual(CHORD_BY_ID.get('major')?.intervals, [0, 4, 7]);
@@ -46,6 +46,8 @@ test('Chord definitions match the prompt specifications exactly', () => {
   assert.equal(CHORD_BY_ID.get('minor_seventh')?.formula, '1 m3 5 m7');
   assert.deepEqual(CHORD_BY_ID.get('half_diminished_seventh')?.intervals, [0, 3, 6, 10]);
   assert.equal(CHORD_BY_ID.get('half_diminished_seventh')?.formula, '1 m3 b5 m7');
+  assert.deepEqual(CHORD_BY_ID.get('diminished_seventh')?.intervals, [0, 3, 6, 9]);
+  assert.equal(CHORD_BY_ID.get('diminished_seventh')?.formula, '1 m3 b5 bb7');
 });
 
 test('Interval definitions match the prompt specifications exactly', () => {
@@ -489,8 +491,8 @@ test('Simulated 100-question quiz loop shows flawless randomization with zero co
     chordCounts.set(q.chordId, (chordCounts.get(q.chordId) || 0) + 1);
   }
 
-  // All 8 chords must have been generated (no shallow starvation)
-  assert.equal(chordCounts.size, 8, 'All 8 chord types must be represented in 100 questions');
+  // All 9 chords must have been generated (no shallow starvation)
+  assert.equal(chordCounts.size, 9, 'All 9 chord types must be represented in 100 questions');
   for (const [id, count] of chordCounts) {
     assert.ok(count >= 5, `Chord ${id} should appear at least 5 times in 100 questions (appeared ${count} times)`);
   }
@@ -537,3 +539,72 @@ test('Simulated 100-question quiz loop shows flawless randomization with zero co
     assert.ok(count >= 3, `Interval ${id} should appear at least 3 times in 100 questions (appeared ${count} times)`);
   }
 });
+
+test('2-chord randomization avoids lockstep alternating patterns and caps streaks at 2', () => {
+  const activeChords = ['major', 'minor'];
+  const history: string[] = [];
+
+  for (let i = 0; i < 60; i++) {
+    const q = generateChordQuestion(activeChords, history, undefined, 2);
+    history.push(q.chordId);
+  }
+
+  // Both chords must be generated with healthy balance (at least 18 out of 60)
+  const majorCount = history.filter(c => c === 'major').length;
+  const minorCount = history.filter(c => c === 'minor').length;
+  assert.ok(majorCount >= 18, `Major count should be >= 18 (was ${majorCount})`);
+  assert.ok(minorCount >= 18, `Minor count should be >= 18 (was ${minorCount})`);
+
+  // Streaks must never exceed 2 identical chords in a row
+  for (let i = 2; i < history.length; i++) {
+    assert.ok(
+      !(history[i] === history[i - 1] && history[i - 1] === history[i - 2]),
+      `Streak of 3 identical chords detected at index ${i}: ${history.slice(i - 2, i + 1)}`
+    );
+  }
+
+  // Must NOT strictly alternate forever (must have at least one streak of 2 to prove true randomness)
+  let foundConsecutivePair = false;
+  for (let i = 1; i < history.length; i++) {
+    if (history[i] === history[i - 1]) {
+      foundConsecutivePair = true;
+      break;
+    }
+  }
+  assert.ok(foundConsecutivePair, 'Randomization must be non-deterministic, not a strict alternating ping-pong');
+});
+
+test('4-chord randomization avoids repeating cycles and maintains balanced exploration', () => {
+  const activeChords = ['major', 'minor', 'diminished', 'augmented'];
+  const history: string[] = [];
+
+  for (let i = 0; i < 48; i++) {
+    const q = generateChordQuestion(activeChords, history, undefined, 2);
+    // Never immediate consecutive duplicate
+    if (history.length > 0) {
+      assert.notEqual(q.chordId, history[history.length - 1], 'Immediate duplicate chord in 4-chord pool');
+    }
+    history.push(q.chordId);
+  }
+
+  // All 4 chords must appear
+  for (const c of activeChords) {
+    const count = history.filter(x => x === c).length;
+    assert.ok(count >= 5, `Chord ${c} should appear at least 5 times in 48 trials (appeared ${count})`);
+  }
+
+  // Check that the sequence is NOT a rigid repeating 4-cycle (e.g. A, B, C, D, A, B, C, D)
+  let rigidCycleCount = 0;
+  for (let i = 7; i < history.length; i++) {
+    if (
+      history[i] === history[i - 4] &&
+      history[i - 1] === history[i - 5] &&
+      history[i - 2] === history[i - 6] &&
+      history[i - 3] === history[i - 7]
+    ) {
+      rigidCycleCount++;
+    }
+  }
+  assert.ok(rigidCycleCount < 3, `Rigid repeating 4-cycle detected too frequently (${rigidCycleCount} times)`);
+});
+

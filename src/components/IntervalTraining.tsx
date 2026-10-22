@@ -142,9 +142,9 @@ export const IntervalTraining: React.FC<IntervalTrainingProps> = ({
     setCurrentQuestion(nextQ);
     setFeedback(null);
     setRecentHistory((prev) => ({
-      intervalIds: [...prev.intervalIds, nextQ.intervalId].slice(-8),
-      rootMidis: [...prev.rootMidis, nextQ.rootMidi].slice(-8),
-      directions: [...prev.directions, nextQ.direction].slice(-6),
+      intervalIds: [...prev.intervalIds, nextQ.intervalId].slice(-10),
+      rootMidis: [...prev.rootMidis, nextQ.rootMidi].slice(-10),
+      directions: [...prev.directions, nextQ.direction].slice(-8),
     }));
     playCurrentQuestion(nextQ, playbackMode, noteSpacing);
   };

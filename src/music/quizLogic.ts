@@ -14,8 +14,13 @@ export function getRandomInt(min: number, max: number): number {
 }
 
 /**
- * Select a random item from array, avoiding recent repetition using an adaptive sliding-window history buffer.
- * If candidates has N items, avoids up to the last N - 1 items (capped at 4) to prevent shallow repeating loops.
+ * Selects a random item from array, eliminating predictable repeating loops and patterns:
+ * 1. Single string previous (legacy/simple callers): strictly avoids repeating that item.
+ * 2. Two candidates (e.g. Major vs Minor): eliminates strict alternating lockstep (A-B-A-B)
+ *    and prevents long streaks (at most 2 identical in a row) using anti-pattern breaking.
+ * 3. Three or more candidates: strictly avoids immediate consecutive repetition, weights
+ *    by recency to eliminate starvation, and dynamically detects & breaks ping-pong (A-B-A-B),
+ *    3-cycle (A-B-C-A-B-C), and 4-cycle (A-B-C-D-A-B-C-D) loops.
  */
 export function pickRandomItemAvoidRepeat(
   candidates: string[],
@@ -28,29 +33,107 @@ export function pickRandomItemAvoidRepeat(
     return candidates[0];
   }
 
-  const history: string[] = Array.isArray(previous)
-    ? previous
-    : previous !== undefined
-    ? [previous]
-    : [];
+  // Handle single string previous (e.g. from single-step callers or simple tests)
+  if (typeof previous === 'string') {
+    const nonRepeat = candidates.filter(c => c !== previous);
+    if (nonRepeat.length > 0) {
+      return nonRepeat[Math.floor(Math.random() * nonRepeat.length)];
+    }
+    return candidates[0];
+  }
 
-  // Exclude up to candidates.length - 1 items (capped at 4) so we never starve candidate items
-  const maxHistoryToExclude = Math.max(1, Math.min(candidates.length - 1, 4));
-  const recentHistory = history.slice(-maxHistoryToExclude);
+  const rawHistory: string[] = Array.isArray(previous) ? previous : [];
+  // Filter history to items currently in the candidate set
+  const history = rawHistory.filter(id => candidates.includes(id));
+  const len = history.length;
 
-  // Filter candidates that are not in recent history, starting from fullest history window
+  // Case 1: Exactly 2 candidates (e.g. Major vs Minor)
+  // Ensures true ear-training unpredictability without lockstep alternation or streaks
+  if (candidates.length === 2) {
+    const [c1, c2] = candidates;
+
+    // Break streaks of 2 (never allow 3 identical in a row)
+    if (len >= 2 && history[len - 1] === history[len - 2]) {
+      return history[len - 1] === c1 ? c2 : c1;
+    }
+
+    // Break alternating ping-pong patterns (A, B, A, B)
+    if (
+      len >= 4 &&
+      history[len - 1] === history[len - 3] &&
+      history[len - 2] === history[len - 4] &&
+      history[len - 1] !== history[len - 2]
+    ) {
+      // Repeat the last item to break the lockstep cycle
+      return history[len - 1];
+    }
+
+    // Unbiased 50/50 random selection
+    return Math.random() < 0.5 ? c1 : c2;
+  }
+
+  // Case 2: 3 or more candidates
+  // Rule of Non-Determinism: ensure the eligible candidate pool maintains at least 2 items
+  // so selection is never reduced to a 100% deterministic lockstep cycle.
+  // Exclude up to Math.min(len, candidates.length - 2, 4) recent items.
+  const maxToExclude = Math.max(1, Math.min(candidates.length - 2, 4));
   let pool: string[] = [];
-  for (let count = recentHistory.length; count >= 1; count--) {
-    const windowSlice = recentHistory.slice(-count);
+  for (let count = maxToExclude; count >= 1; count--) {
+    const windowSlice = history.slice(-count);
     const filtered = candidates.filter(id => !windowSlice.includes(id));
-    if (filtered.length > 0) {
+    if (filtered.length >= 2) {
       pool = filtered;
       break;
     }
   }
 
+  // Fallback: at minimum exclude the immediate previous candidate
+  if (pool.length < 2) {
+    const lastItem = len > 0 ? history[len - 1] : undefined;
+    pool = candidates.filter(c => c !== lastItem);
+  }
   if (pool.length === 0) {
     pool = candidates;
+  }
+
+  // Anti-pattern Filter 1: Avoid ping-pong (A -> B -> A -> B)
+  // If history ends with [X, Y, X], avoid picking Y if other choices remain in pool
+  if (len >= 3 && history[len - 1] === history[len - 3]) {
+    const pingPongCandidate = history[len - 2];
+    const filtered = pool.filter(c => c !== pingPongCandidate);
+    if (filtered.length > 0) {
+      pool = filtered;
+    }
+  }
+
+  // Anti-pattern Filter 2: Avoid 3-cycle (A -> B -> C -> A -> B -> C)
+  // If history ends with [X, Y, Z, X, Y], avoid picking Z if other choices remain in pool
+  if (
+    len >= 5 &&
+    history[len - 1] === history[len - 4] &&
+    history[len - 2] === history[len - 5]
+  ) {
+    const cycle3Candidate = history[len - 3];
+    const filtered = pool.filter(c => c !== cycle3Candidate);
+    if (filtered.length > 0) {
+      pool = filtered;
+    }
+  }
+
+  // Anti-pattern Filter 3: Avoid 4-cycle (A -> B -> C -> D -> A -> B -> C -> D)
+  // If history ends with [W, X, Y, Z, W, X, Y], avoid picking Z if other choices remain in pool
+  if (
+    candidates.length >= 4 &&
+    len >= 7 &&
+    history[len - 1] === history[len - 5] &&
+    history[len - 2] === history[len - 6] &&
+    history[len - 3] === history[len - 7]
+  ) {
+    const cycle4Candidate = history[len - 4];
+    const filtered = pool.filter(c => c !== cycle4Candidate);
+    if (filtered.length > 0) {
+      pool = filtered;
+    }
   }
 
   const index = Math.floor(Math.random() * pool.length);

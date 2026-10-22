@@ -6,6 +6,7 @@ export interface Translations {
   appSubtitle: string;
   madeBy: string;
   chordTrainingTab: string;
+  progressionTrainingTab: string;
   intervalTrainingTab: string;
   languageSelectLabel: string;
 
@@ -67,6 +68,53 @@ export interface Translations {
   descendingBadge: string;
   replayButton: string;
   nextQuestionButton: string;
+
+  // Chord Progression Training
+  progressionTitle: string;
+  progressionSubtitle: string;
+  progressionTiersLabel: string;
+  tier3Chords: string;
+  tier4Chords: string;
+  tier5Chords: string;
+  pass1Playing: string;
+  pauseBetweenPasses: string;
+  pass2Playing: string;
+  waitingForSpeech: string;
+  speechAnnounced: string;
+  spokenAnswerLabel: string;
+  guessDegreesLabel: string;
+  clearGuess: string;
+  autoAdvanceLabel: string;
+  autoAdvanceSubtitle: string;
+  voiceNotice: string;
+  startProgressionQuiz: string;
+  replayProgression: string;
+  nextProgression: string;
+  keyLabel: string;
+  playbackStageLabel: string;
+  progressionPaceLabel: string;
+  progressionPaceSubtitle: string;
+  progressionModeLabel: string;
+  progressiveMasteryMode: string;
+  fixedLevelMode: string;
+  testVoiceButton: string;
+  testingVoice: string;
+  levelPrefix: string;
+  levelBadge: (level: number, length: number) => string;
+  nextLevelButton: string;
+  levelMasteredAlert: string;
+  progLevel1Name: string;
+  progLevel1Desc: string;
+  progLevel2Name: string;
+  progLevel2Desc: string;
+  progLevel3Name: string;
+  progLevel3Desc: string;
+  progLevel4Name: string;
+  progLevel4Desc: string;
+  progLevel5Name: string;
+  progLevel5Desc: string;
+  progLevel6Name: string;
+  progLevel6Desc: string;
 
   // Selection panels
   activeChordSelectionTitle: string;
@@ -132,6 +180,7 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     appSubtitle: 'Akor & Navber',
     madeBy: 'Ji aliyê M.Gençler ve hate çêkirin',
     chordTrainingTab: 'Perwerdeya Akoran',
+    progressionTrainingTab: 'Testa Pêşveçûnê',
     intervalTrainingTab: 'Perwerdeya Navberan',
     languageSelectLabel: 'Ziman',
 
@@ -194,6 +243,53 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     descendingBadge: '(Dadikeve ↓)',
     replayButton: 'Dubare Bike',
     nextQuestionButton: 'Pirsa Din',
+
+    // Chord Progression Training
+    progressionTitle: 'Testa Pêşveçûna Akoran',
+    progressionSubtitle: 'Akorên li pey hev bibihîzin, pileyên dereceyan nas bikin û bi bersiva dengê jin fêr bibin',
+    progressionTiersLabel: 'Asta Dirêjiya Pêşveçûnê',
+    tier3Chords: '3 Akor (Hêsan)',
+    tier4Chords: '4 Akor (Navîn)',
+    tier5Chords: '5 Akor (Pêşketî)',
+    pass1Playing: 'Guhdarîkirina 1. (Lê dide...)',
+    pauseBetweenPasses: 'Bisekine... (Cara 2. tê lêdan)',
+    pass2Playing: 'Guhdarîkirina 2. (Lê dide...)',
+    waitingForSpeech: 'Li benda bersiva bi deng e...',
+    speechAnnounced: 'Bersiva bi Deng Hate Gotin',
+    spokenAnswerLabel: 'Bersiva bi Deng (English):',
+    guessDegreesLabel: 'Texmîna xwe hilbijêre (Bijarî):',
+    clearGuess: 'Texmînê Jê Bibe',
+    autoAdvanceLabel: 'Pêşveçûna Xweber',
+    autoAdvanceSubtitle: 'Piştî gotina bersivê bixweber derbasî pirsa nû dibe',
+    voiceNotice: 'Dengê Mirov (Jina English): "one four one" hwd.',
+    startProgressionQuiz: 'Testa Pêşveçûnê Dest Pê Bike',
+    replayProgression: 'Pêşveçûnê Dubare Bike',
+    nextProgression: 'Pêşveçûna Nû',
+    keyLabel: 'Meqam / Kilît:',
+    playbackStageLabel: 'Qonaxa Lêdanê:',
+    progressionPaceLabel: 'Leza Lênanê',
+    progressionPaceSubtitle: 'Dema lêdana her akorê di pêşveçûnê de',
+    progressionModeLabel: 'Moda Testê',
+    progressiveMasteryMode: 'Zêdebûna Pêşverû (Kademelî)',
+    fixedLevelMode: 'Hilbijartina Astê (Serbest)',
+    testVoiceButton: 'Dengê Jinê Bipirse',
+    testingVoice: 'Deng tê lêdan...',
+    levelPrefix: 'Asta',
+    levelBadge: (level: number, length: number) => `Asta ${level} · ${length} Akor`,
+    nextLevelButton: 'Derbasî Asta Pêş Bibe',
+    levelMasteredAlert: 'Aferîn! Te ev ast serkeftî qedand. Asta dijwartir dest pê kir!',
+    progLevel1Name: 'Asta 1: 2 Akorên Bingehîn',
+    progLevel1Desc: 'Kadansên herî hêsan: Pileyên I, IV û V (I - V, I - IV, V - I)',
+    progLevel2Name: 'Asta 2: 3 Akor (Pileyên Sereke)',
+    progLevel2Desc: 'Pêşveçûnên navdar: I - IV - I, I - V - I, IV - V - I',
+    progLevel3Name: 'Asta 3: 3 Akor (Bi Pileyên Mînor)',
+    progLevel3Desc: 'Pileyên mînor ên kûr: I - ii - V, ii - V - I, I - vi - IV',
+    progLevel4Name: 'Asta 4: 4 Akor (Kadansên Klasîk & Pop)',
+    progLevel4Desc: 'Pêşveçûnên navdar ên 4-akorî: I - V - vi - IV, I - vi - IV - V',
+    progLevel5Name: 'Asta 5: 4 Akor (Diatonîk a Kûr)',
+    progLevel5Desc: 'Zivirînên harmonîk û pêşketî: I - vi - ii - V, vi - IV - I - V',
+    progLevel6Name: 'Asta 6: 5 Akor (Dewreyên Tam yên Kadansê)',
+    progLevel6Desc: 'Hevokên tam ên muzîkî: I - vi - ii - V - I, I - IV - ii - V - I',
 
     // Selection panels
     activeChordSelectionTitle: 'Hilbijartina Akorên Çalak',
@@ -263,6 +359,7 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     appSubtitle: 'Akorlar & Aralıklar',
     madeBy: 'M.Gençler tarafından yapılmıştır',
     chordTrainingTab: 'Akor Eğitimi',
+    progressionTrainingTab: 'Akor İlerlemesi',
     intervalTrainingTab: 'Aralık Eğitimi',
     languageSelectLabel: 'Dil',
 
@@ -325,6 +422,53 @@ export const TRANSLATIONS: Record<Language, Translations> = {
     descendingBadge: '(İnici ↓)',
     replayButton: 'Tekrar Dinle',
     nextQuestionButton: 'Sonraki Soru',
+
+    // Chord Progression Training
+    progressionTitle: 'Akor İlerlemesi Eğitimi',
+    progressionSubtitle: 'Akor dizisini dinleyin, dereceyi tanıyın ve İngilizce kadın sesiyle pekiştirin',
+    progressionTiersLabel: 'İlerleme Uzunluk Seviyesi',
+    tier3Chords: '3 Akor (Temel)',
+    tier4Chords: '4 Akor (Orta)',
+    tier5Chords: '5 Akor (İleri)',
+    pass1Playing: '1. Dinleme (Çalınıyor...)',
+    pauseBetweenPasses: 'Bekleniyor... (2. kez çalınacak)',
+    pass2Playing: '2. Dinleme (Çalınıyor...)',
+    waitingForSpeech: 'Sesli cevap bekleniyor...',
+    speechAnnounced: 'Sesli Cevap Söylendi',
+    spokenAnswerLabel: 'Sesli Cevap (İngilizce):',
+    guessDegreesLabel: 'Tahmininizi yapın (İsteğe bağlı):',
+    clearGuess: 'Tahmini Temizle',
+    autoAdvanceLabel: 'Otomatik İlerleme',
+    autoAdvanceSubtitle: 'Cevap seslendirildikten sonra otomatik yeni soruya geçer',
+    voiceNotice: 'İnsan Sesi (Kadın İngilizce): "one four one" vb.',
+    startProgressionQuiz: 'İlerleme Testini Başlat',
+    replayProgression: 'İlerlemeyi Tekrar Çal',
+    nextProgression: 'Yeni İlerleme',
+    keyLabel: 'Tonalite / Ton:',
+    playbackStageLabel: 'Çalma Aşaması:',
+    progressionPaceLabel: 'Çalma Hızı',
+    progressionPaceSubtitle: 'İlerlemedeki her bir akorun çalma süresi',
+    progressionModeLabel: 'İlerleme Modu',
+    progressiveMasteryMode: 'Kademeli Öğrenme (Otomatik Seviye)',
+    fixedLevelMode: 'Serbest Seviye Seçimi',
+    testVoiceButton: 'Kadın Sesini Dene',
+    testingVoice: 'Ses çalınıyor...',
+    levelPrefix: 'Seviye',
+    levelBadge: (level: number, length: number) => `Seviye ${level} · ${length} Akor`,
+    nextLevelButton: 'Sonraki Seviyeye Geç',
+    levelMasteredAlert: 'Tebrikler! Bu seviyeyi başarıyla tamamladınız. Bir üst seviyeye geçildi!',
+    progLevel1Name: 'Seviye 1: 2 Temel Akor',
+    progLevel1Desc: 'En temel kadanslar: I, IV ve V dereceleri (I - V, I - IV, V - I)',
+    progLevel2Name: 'Seviye 2: 3 Akor (Ana Dereceler)',
+    progLevel2Desc: 'Klasik kadanslar: I - IV - I, I - V - I, IV - V - I',
+    progLevel3Name: 'Seviye 3: 3 Akor (Minör Derecelerle)',
+    progLevel3Desc: 'Daha zengin minör tonlar: I - ii - V, ii - V - I, I - vi - IV',
+    progLevel4Name: 'Seviye 4: 4 Akor (Klasik & Pop Kalıpları)',
+    progLevel4Desc: 'Ünlü 4 akorlu pop ve klasik kalıpları: I - V - vi - IV, I - vi - IV - V',
+    progLevel5Name: 'Seviye 5: 4 Akor (İleri Diyatonik & Dönüşler)',
+    progLevel5Desc: 'Güçlü armonik dönüşler: I - vi - ii - V, vi - IV - I - V',
+    progLevel6Name: 'Seviye 6: 5 Akor (Tam Kadans Döngüleri)',
+    progLevel6Desc: 'Tam müzikal kadans cümleleri: I - vi - ii - V - I, I - IV - ii - V - I',
 
     // Selection panels
     activeChordSelectionTitle: 'Etkin Akor Seçimi',
@@ -445,6 +589,12 @@ export const CHORD_LOCALIZATION: Record<
       formula: '1 m3 b5 m7',
       description: 'Notaya bingehîn, Sêyema piçûk, Pêncema kêmkirî, Heftema piçûk [1 m3 b5 m7]',
     },
+    diminished_seventh: {
+      name: 'Kêmkirî heftemîn (dim7)',
+      shortName: 'dim7',
+      formula: '1 m3 b5 bb7',
+      description: 'Notaya bingehîn, Sêyema piçûk, Pêncema kêmkirî, Heftema kêmkirî [1 m3 b5 bb7]',
+    },
   },
   tr: {
     major: {
@@ -494,6 +644,12 @@ export const CHORD_LOCALIZATION: Record<
       shortName: 'm7b5',
       formula: '1 m3 b5 m7',
       description: 'Kök, Küçük 3\'lü, Eksilmiş 5\'li, Küçük 7\'li [1 m3 b5 m7]',
+    },
+    diminished_seventh: {
+      name: 'Eksilmiş yedili (dim7)',
+      shortName: 'dim7',
+      formula: '1 m3 b5 bb7',
+      description: 'Kök, Küçük 3\'lü, Eksik 5\'li, Çift eksik 7\'li [1 m3 b5 bb7]',
     },
   },
 };

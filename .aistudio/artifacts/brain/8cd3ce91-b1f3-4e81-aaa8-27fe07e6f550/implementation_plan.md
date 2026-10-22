@@ -1,183 +1,158 @@
-# Independent Chord Mistakes Module & Analytics Tab
+# Chord Progression Ear Training & Dim7 Chord Integration
 
-A dedicated, client-side mistake tracking and error analytics module that automatically records incorrectly answered chords in browser storage (`localStorage`), organizes them by chord type with error frequencies and timestamps, and visualizes them in an independent third tab with summary charts in both Kurdish (Kurmancî) and Turkish.
+A comprehensive blueprint for introducing an independent **Chord Progression Test** section with adjustable length tiers, two-pass audio playback, automated female voice speech reveal, and integrating the **4-voice Diminished 7th (`dim7`)** chord into the chord stack.
 
 ---
 
-### User Review & Critical Decisions
+## User Review & Critical Decisions
 
 > [!IMPORTANT]
-> The following decisions were confirmed with the user during Phase 1:
-> - **Tracking Scope**: **Chord training only** — mistakes from the chord identification quiz will be captured and tracked.
-> - **Mistakes View Mode**: **Summary charts with total counts** — providing an analytical breakdown of mistake distribution and frequency per chord type.
-> - **Data Organization**: **Aggregated by chord type with mistake count and latest date** — showing how many times each specific chord type has been missed and the exact timestamp/date of the most recent error.
-> - **Data Storage**: Client-side **browser storage (`localStorage`)** with zero backend telemetry or server dependence, ensuring 100% privacy and offline operation.
-
-- **Storage Key**: `music_ear_trainer_chord_mistakes_v1`
-- **Tab Placement**: Added as a 3rd tab in the primary top bar alongside Chord Training and Interval Training (`Şaşiyên Min` in Kurmancî, `Hatalarım` in Türkçe).
-- **Reset Capability**: Provides a clear/reset action with confirmation to let the user wipe mistake history when starting a fresh study phase.
+> The following decisions were confirmed through interactive clarification and define the core behavior of the new feature:
+> - **Flow & Interaction**: Auto-reveal loop with optional interactive guess buttons. Users can practice hands-free while actively testing their recognition before the spoken answer.
+> - **Voice & Pronunciation**: Browser Web Speech API configured with an English female voice uttering clear scale degree numbers (e.g., *"one four one"*, *"one six four five"*).
+> - **Progression Difficulty**: Structured into adjustable length tiers: **3 Chords** (foundational cadences), **4 Chords** (classic pop/classical cadences), and **5 Chords** (extended harmonic journeys).
+> - **Dim7 Chord Addition**: A 4-voice diminished seventh chord (`[0, 3, 6, 9]`, formula `1 m3 b5 bb7`) added seamlessly to the 4-note chord training stack, mistake analytics, and localization dictionaries.
 
 ---
 
-### 1. Overview & Core Concept
+## 1. Overview & Core Concept
 
-- **What It Does**: Whenever a user submits an incorrect chord answer in Chord Ear Training, the target chord they failed to identify is recorded in browser `localStorage`. In the new "My Mistakes" (`Şaşiyên Min` / `Hatalarım`) tab, the user can review an aggregated report showing:
-  1. High-level performance cards (Total Mistakes, Most Missed Chord, Latest Error Date).
-  2. Relative frequency bar visualizer comparing mistake rates across chord types.
-  3. Ranked list of mistake items displaying the localized chord name, scale formula (e.g., `1 m3 5 m7`), mistake count, percentage of total errors, and formatted timestamp of the last occurrence.
-  4. Reset option to clear the mistake log at any time.
-- **Target Audience / Persona**: Music students, composers, and ear-training learners who want to identify their specific perceptual blind spots (e.g., consistently confusing Diminished 7th with Half-Diminished 7th, or Minor 7th with Dominant 7th) and track improvement over time.
-- **Key Value**: Closes the learning loop by providing immediate self-awareness of recurring errors without requiring external accounts, servers, or complicated spreadsheets.
+### What It Does
+- **Chord Progression Test Section**: An independent ear-training module that generates functional diatonic chord progressions in popular musical keys (e.g. C Major, G Major, F Major, D Major).
+- **Two-Pass Listening & Voice Reveal**:
+  1. App plays the progression rhythmically (smooth voice-leading or root-position piano chords with gentle decay).
+  2. Waits for a reflective pause (~2.2s).
+  3. Plays the progression a second time for verification.
+  4. Waits a brief moment (~1.8s).
+  5. A natural female voice speaks the answer aloud (e.g., *"one four one"*), while the visual Roman numeral cards reveal simultaneously (`I - IV - I`).
+- **Interactive Option**: While the audio plays, users can optionally tap chord number buttons (`I`, `ii`, `iii`, `IV`, `V`, `vi`, `vii°`) to submit their guess before the voice announces it, earning instant visual feedback and tracking progression mastery.
+- **Dim7 Chord Integration**: Expands the 4-note chord inventory from 4 chords to 5 chords (`maj7`, `7`, `m7`, `m7b5`, and `dim7`), giving musicians a complete toolkit for seventh chords.
 
 ---
 
-### 2. User Experience & Visual Design
+## 2. User Experience & Visual Design
 
-#### Key User Flows
+### Two-Zone Layout (Education & Simulation Domain)
+Following the educational simulation guidelines, the Progression section is split into two coordinated zones:
 
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
-│                        CHORD TRAINING SESSION                          │
-│                                                                        │
-│  User hears chord -> Submits guess                                     │
-│  ├── If Correct: Green feedback, streaks increment                    │
-│  └── If Wrong: Target chord is silently passed to Mistakes Storage     │
-│      ├── Increments mistake count for this chord ID                    │
-│      ├── Updates ISO timestamp of latest mistake                       │
-│      └── Updates top bar mistake counter badge                         │
-└───────────────────────────────────┬────────────────────────────────────┘
-                                    │
-                                    ▼ (User switches tab)
+│  PERWERDEYA GUHÎ  ·  Akor & Navber & Pêşveçûn                           │
+│  [Perwerdeya Akoran]  [Testa Pêşveçûnê (New)]  [Navberan]  [Şaşiyên Min] │
+└────────────────────────────────────────────────────────────────────────┘
 ┌────────────────────────────────────────────────────────────────────────┐
-│                        MISTAKES ANALYTICS TAB                          │
+│ Zone 1: Stage & Progression Workspace                                  │
 │                                                                        │
-│  Top Summary Grid:                                                     │
-│  ├── Total Recorded Mistakes (e.g. 14 şaşî / 14 hata)                  │
-│  ├── Most Missed Chord (e.g. Minor 7th · 5 caran)                      │
-│  └── Most Recent Mistake Date (e.g. 17.10.2026 09:12)                  │
+│  [ Stage: Playing Pass 1 / Pass 2 / Spoken Answer / Completed ]        │
+│  ┌──────────────────────────────────────────────────────────────────┐  │
+│  │   Chord 1         Chord 2         Chord 3        [Chord 4 / 5]   │  │
+│  │   ┌─────┐         ┌─────┐         ┌─────┐                        │  │
+│  │   │  I  │   ──►   │ IV  │   ──►   │  I  │                        │  │
+│  │   │  C  │         │  F  │         │  C  │                        │  │
+│  │   └─────┘         └─────┘         └─────┘                        │  │
+│  │   "One"           "Four"          "One"                          │  │
+│  └──────────────────────────────────────────────────────────────────┘  │
 │                                                                        │
-│  Frequency Distribution Chart:                                         │
-│  └── Proportional comparative bars for each missed chord type          │
-│                                                                        │
-│  Ranked Mistake Table / Cards:                                         │
-│  └── Localized Name · Scale Formula · Count · % Share · Last Date      │
-│                                                                        │
-│  Bottom Actions:                                                       │
-│  └── Reset/Clear All Records (with safety confirmation)                │
+│  [ Optional Guess Slots & Degree Picker: I  ii  iii  IV  V  vi  vii° ] │
+├────────────────────────────────────────────────────────────────────────┤
+│ Zone 2: Control & Configuration Deck                                   │
+│  - Level Tier: [ 3 Chords ]  [ 4 Chords ]  [ 5 Chords ]                │
+│  - Playback Controls: [ Play / Pause ] [ Replay Now ] [ Next Question] │
+│  - Pace Slider: Chord duration (0.8s – 2.0s) & Voice volume            │
+│  - Auto-Advance Toggle: Hands-free continuous loop vs manual next      │
 └────────────────────────────────────────────────────────────────────────┘
 ```
 
-#### Visual Identity & Theme
-- **Aesthetic Direction**: Utilitarian, studio-grade dark interface consistent with the amber-accented stone design system (`stone-950` canvas, `stone-900` cards, `amber-500` primary interactive accents, `rose-500/rose-400` disciplined error accents).
-- **60-30-10 Color Discipline**:
-  - `60%`: Neutral dark canvas (`bg-stone-950` with subtle `stone-900` ambient background).
-  - `30%`: Structural panels (`bg-stone-900`, `border-stone-800` hairline boundaries, `text-stone-300` and `text-stone-400` typography).
-  - `10%`: Focused accents (`rose-400` error badge glyphs, `amber-500` active tab state, `emerald-500` nominal/empty state indicator).
-- **Typography & Tabular Precision**:
-  - Display titles: Clean, medium-weight headings with balanced wraps.
-  - Metrics & Counts: Strict `font-mono tabular-nums` for all error counts, percentages, and timestamps to eliminate layout shift.
-  - Scale degree formulas: Monospace badges (`1 m3 5 m7`, `1 3 5 M7`) matching the exact format implemented in the previous update.
-- **Empty State**:
-  - When no mistakes have been recorded (or after clearing), displays an encouraging empty state:
-    - Kurmancî: *"Hîna ti şaşî nehatine tomarkirin. Dema ku hûn di ezmûna akoran de bersivek şaş bidin, ew ê li vir bêne tomarkirin."*
-    - Türkçe: *"Henüz hiç hata kaydedilmedi. Akor kulak eğitiminde yanlış bir cevap verdiğinizde, detayları burada kaydedilecektir."*
+### Visual Styling & Accessibility
+- **Theme Consistency**: Preserves the sophisticated deep-stone aesthetic (`bg-stone-950`, `border-stone-800`, `text-stone-100`, `accent-amber-500`).
+- **Roman Numeral Badges**: Clean, unboxed typography cards with distinct harmonic colors (Tonic in amber/emerald, Subdominant in sky blue, Dominant in purple/rose).
+- **Motion & Pulsing States**: Active chord illuminates as it sounds, providing visual synchronization without distracting flash.
+- **Single-Line Controls**: All buttons and segmented controls follow strict single-line text constraints (`whitespace-nowrap shrink-0`).
 
 ---
 
-### 3. Key Product Decisions & Trade-Offs
+## 3. Key Product Decisions & Trade-Offs
 
-#### Decision 1: Pure Client-Side Browser Storage (`localStorage`)
-- **Chosen Approach**: Use a dedicated, typed storage wrapper module (`src/storage/mistakesStorage.ts`) storing data under key `music_ear_trainer_chord_mistakes_v1`.
-- **Why**: Zero network overhead, completely offline, zero authentication friction, and maximum user privacy.
-- **Alternatives Considered**: IndexedDB (unnecessary complexity for an aggregated dictionary of at most 8 chord types), Firebase/Server database (user explicitly requested data to remain in the user's browser).
+### 1. Progression Library & Generation Strategy
+- **Decision**: Curate realistic, musically sound diatonic progressions categorized by length tiers (3, 4, and 5 chords) combined with dynamic key transposition (C, G, D, F, Bb Major).
+  - *Tier 1 (3 Chords)*: `I - IV - I`, `I - V - I`, `I - IV - V`, `I - V - IV`, `ii - V - I`, `I - vi - I`.
+  - *Tier 2 (4 Chords)*: `I - IV - V - I`, `I - V - vi - IV` (Pop cadence), `I - vi - IV - V` (Doo-wop), `ii - V - I - I`, `I - IV - ii - V`, `I - vi - ii - V`.
+  - *Tier 3 (5 Chords)*: `I - vi - ii - V - I`, `I - IV - I - V - I`, `I - V - vi - iii - IV`, `ii - V - iii - vi - ii`.
+- **Why**: Purely random chord sequences sound musically nonsensical and harm functional harmonic training. Curated diatonic patterns teach users real musical syntax used in classical, pop, jazz, and folk music.
 
-#### Decision 2: Aggregated Summary Schema with Date Stamp
-- **Chosen Approach**: Store records as an ID-indexed map:
-  ```ts
-  Record<string, { chordId: string; mistakeCount: number; lastMistakeDate: string }>
-  ```
-- **Why**: Constant-time $O(1)$ lookups and updates on every mistake, minimal memory footprint, and maps directly to the user's requirement ("Aggregate by chord type with mistake count and latest date").
-- **Alternatives Considered**: An unbounded array of event logs. While an event log allows time-series analysis, the user explicitly selected "Summary charts with total counts only" and "Aggregate by chord type".
+### 2. Speech Synthesis Architecture
+- **Decision**: Native browser `window.speechSynthesis` with intelligent female voice filtering and graceful fallback.
+  - Detects preferred English female voices: `"Google US English (Female)"`, `"Samantha"`, `"Victoria"`, `"Karen"`, `"Zira"`, or voices with `lang: 'en-*'` and pitch modulation.
+  - Speaks spaced words (e.g. `utterance.text = "one . four . one"`) with `rate: 0.9` for clear educational enunciation.
+- **Why**: Zero external API dependencies, zero network latency, zero costs, and 100% offline capability.
 
-#### Decision 3: Independent Module Architecture
-- **Chosen Approach**: Decouple storage and statistics calculation into pure, side-effect-free helper functions (`getMistakesSummary`, `recordChordMistake`, `clearAllMistakes`) with automated unit tests (`mistakesStorage.test.ts`), and render via a standalone component (`ChordMistakesView.tsx`).
-- **Why**: Keeps `ChordTraining.tsx` focused on playback/quiz mechanics without bloating it with analytics code, and allows `App.tsx` to mount `ChordMistakesView` cleanly.
+### 3. Voice Leading & Acoustic Realism in AudioEngine
+- **Decision**: Extend `AudioEngine` to support sequential chord progressions (`playChordProgression`) with smooth sustain and natural voice leading, avoiding jarring jumps across octaves.
 
 ---
 
-### 4. Technical Architecture & Data Strategy
-
-#### Component Hierarchy & Data Flow
+## 4. Technical Architecture & Data Strategy
 
 ```
-┌────────────────────────────────────────────────────────────────────────┐
-│                                App.tsx                                 │
-│  - language: 'ku' | 'tr'                                               │
-│  - activeSection: 'chords' | 'intervals' | 'mistakes'                  │
-│  - mistakesState: ChordMistakeRecord[] (updated via callback)          │
-└───────┬───────────────────────────────┬────────────────────────┬───────┘
-        │                               │                        │
-        ▼                               ▼                        ▼
-┌──────────────────┐          ┌──────────────────┐     ┌─────────────────┐
-│  ChordTraining   │          │ IntervalTraining │     │ChordMistakesView│
-│  - onMistake(id) │          │  (Standard view) │     │ - Summary Cards │
-│  - Audio Playback│          └──────────────────┘     │ - Bar Chart     │
-│  - Quiz Loop     │                                   │ - Ranked List   │
-└───────┬──────────┘                                   │ - Reset Action  │
-        │                                              └────────┬────────┘
-        ▼                                                       ▼
-┌────────────────────────────────────────────────────────────────────────┐
-│                   src/storage/mistakesStorage.ts                       │
-│  - loadChordMistakes(): ChordMistakeRecord[]                           │
-│  - recordChordMistake(chordId: string): ChordMistakeRecord[]           │
-│  - clearChordMistakes(): void                                          │
-│  - calculateMistakesSummary(records): MistakesSummary                  │
-│  - Reads/Writes: localStorage['music_ear_trainer_chord_mistakes_v1']   │
-└────────────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────┐
+│                            App.tsx                                  │
+│   activeSection: 'chords' | 'progressions' | 'intervals' | 'mistakes'│
+└──────────────┬───────────────────────────────┬──────────────────────┘
+               │                               │
+┌──────────────▼─────────────┐   ┌─────────────▼──────────────────────┐
+│     ChordTraining.tsx      │   │   ChordProgressionTraining.tsx     │
+│  - 8 Chords + NEW dim7     │   │  - 3, 4, 5 Chord Length Tiers      │
+│  - Chord Mistake Tracking  │   │  - Two-Pass Audio Loop             │
+└──────────────┬─────────────┘   │  - Web Speech Female Voice Engine  │
+               │                 │  - Optional Guess Buttons          │
+               │                 └─────────────┬──────────────────────┘
+               ▼                               ▼
+┌─────────────────────────────────────────────────────────────────────┐
+│                 src/audio/audioEngine.ts                            │
+│  - playChord(), playInterval()                                      │
+│  - NEW: playProgressionSequence(chords, chordDuration, spacing)     │
+│  - NEW: speechService.ts (female voice synthesis helper)            │
+└─────────────────────────────────────────────────────────────────────┘
 ```
 
-#### Data Entities
-
+### Data Structures & Types
 ```typescript
-export interface ChordMistakeRecord {
-  chordId: string;
-  mistakeCount: number;
-  lastMistakeDate: string; // ISO 8601 string (e.g. "2026-10-17T09:12:30.000Z")
+export interface ProgressionChord {
+  degree: 'I' | 'ii' | 'iii' | 'IV' | 'V' | 'vi' | 'vii°';
+  spokenName: string; // "one", "two", "three", "four", "five", "six", "seven"
+  quality: 'major' | 'minor' | 'diminished';
+  rootMidi: number;
+  noteMidis: number[];
+  noteNames: string[];
 }
 
-export interface MistakesSummary {
-  totalMistakes: number;
-  uniqueChordsMissed: number;
-  mostMissedChordId: string | null;
-  mostRecentMistakeDate: string | null;
-  items: Array<ChordMistakeRecord & {
-    percentage: number;
-  }>;
+export interface ProgressionQuestion {
+  id: string;
+  keyName: string; // e.g. "C Major"
+  keyRootMidi: number;
+  romanNumerals: string[]; // e.g. ["I", "IV", "I"]
+  spokenAnswer: string; // "one four one"
+  chords: ProgressionChord[];
+  tier: 3 | 4 | 5;
 }
 ```
 
-#### Internationalization Additions (`src/i18n/translations.ts`)
-- Tab label: `mistakesTab`: `'Şaşiyên Min'` (Kurdish) / `'Hatalarım'` (Turkish).
-- Header & subtitles: `mistakesTitle`, `mistakesSubtitle`.
-- Metrics: `totalMistakesLabel`, `mostMissedChordLabel`, `lastMistakeDateLabel`.
-- Chart & columns: `mistakeDistributionTitle`, `chordTypeHeader`, `mistakeCountHeader`, `percentageHeader`, `lastOccurredHeader`.
-- Actions: `clearMistakesButton`, `confirmClearTitle`, `confirmClearMessage`, `confirmYes`, `confirmCancel`.
-- Empty state: `noMistakesTitle`, `noMistakesDescription`.
-
 ---
 
-### 5. Verification & Acceptance Criteria
+## 5. Step-by-Step Implementation Strategy
 
-1. **Storage Integrity**:
-   - Calling `recordChordMistake('minor_seventh')` creates or increments the record in `localStorage` and stamps the current ISO date.
-   - Calling `clearChordMistakes()` cleans the storage key safely without crashing if empty or corrupted.
-   - Comprehensive unit tests written and verified via `npm run test`.
-2. **Quiz Integration**:
-   - In `ChordTraining.tsx`, when a user selects a wrong chord during an active quiz, `recordChordMistake(targetChordId)` is called immediately.
-   - The top tab shows the updated mistake badge count without requiring a page reload.
-3. **Dedicated Mistakes Tab UI**:
-   - Switching to the new tab displays summary cards, proportional distribution bar chart, and ranked list with localized names, scale degrees, and dates.
-   - Reset action opens confirmation dialog and cleanly clears the list and chart.
-   - Switching language between Kurmancî and Türkçe instantly translates all mistake metrics and labels.
-4. **Build & Type Checking**:
-   - Passes `npm run test`, `npm run lint` (`tsc --noEmit`), and `npm run build`.
+1. **Music Definitions**:
+   - Add `diminished_seventh` to `CHORD_DEFINITIONS` in `src/music/definitions.ts`.
+   - Add diatonic progression generator and templates in `src/music/progressionLogic.ts`.
+2. **Audio & Speech Engine**:
+   - Add `playProgressionSequence` in `src/audio/audioEngine.ts`.
+   - Implement `speakAnswer(text)` in `src/audio/speechEngine.ts` targeting female English voices.
+3. **Localization**:
+   - Update `src/i18n/translations.ts` with Kurdish and Turkish translations for progression tests and dim7.
+4. **Component Implementation**:
+   - Build `src/components/ChordProgressionTraining.tsx` with two-zone layout, progress indicator, level tier tabs, guess buttons, and replay.
+   - Update `App.tsx` navigation bar with new "Testa Pêşveçûnê" / "Akor İlerlemesi" tab.
+5. **Unit Testing & Verification**:
+   - Write comprehensive tests in `src/music/progressionLogic.test.ts`.
+   - Validate build with `npm run test` and `compile_applet`.
+   - Run browser verification with Chromium via `playwright-cli`.

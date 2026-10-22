@@ -6,7 +6,7 @@ export type IntervalPlaybackMode = 'harmonic' | 'melodic' | 'melodic_ascending';
 
 export type MelodicDirection = 'both' | 'ascending' | 'descending';
 
-export type SectionType = 'chords' | 'intervals' | 'mistakes';
+export type SectionType = 'chords' | 'progressions' | 'intervals' | 'mistakes';
 
 export type Language = 'ku' | 'tr';
 
@@ -81,4 +81,29 @@ export interface PitchRangeDefinition {
   maxMidi: number;
   label: string;
 }
+
+export type DiatonicDegree = 'I' | 'ii' | 'iii' | 'IV' | 'V' | 'vi' | 'vii°';
+
+export interface ProgressionChord {
+  degree: DiatonicDegree;
+  spokenName: string; // "one", "two", "three", "four", "five", "six", "seven"
+  rootName: string; // e.g. "C4", "F4", "G4"
+  chordName: string; // e.g. "C", "F", "G", "Am", "Dm"
+  noteMidis: number[];
+  noteNames: string[];
+}
+
+export interface ProgressionQuestion {
+  id: string;
+  level: number; // 1 to 6
+  length: number; // 2, 3, 4, 5 chords
+  keyName: string; // e.g. "C Major"
+  keyRootMidi: number;
+  degrees: DiatonicDegree[];
+  spokenAnswer: string; // e.g. "one four one"
+  spokenWords: string[]; // ['one', 'four', 'one']
+  chords: ProgressionChord[];
+  tier: number; // For backward compatibility (2 | 3 | 4 | 5)
+}
+
 

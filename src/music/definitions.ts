@@ -89,6 +89,16 @@ export const CHORD_DEFINITIONS: readonly ChordDefinition[] = [
     category: 'four-note',
     symbol: 'm7b5 / ø7',
     description: 'Root, Minor 3rd, Diminished 5th, Minor 7th [1 m3 b5 m7]'
+  },
+  {
+    id: 'diminished_seventh',
+    name: 'Diminished seventh',
+    shortName: 'dim7',
+    formula: '1 m3 b5 bb7',
+    intervals: [0, 3, 6, 9],
+    category: 'four-note',
+    symbol: 'dim7 / °7',
+    description: 'Root, Minor 3rd, Diminished 5th, Diminished 7th [1 m3 b5 bb7]'
   }
 ] as const;
 
